@@ -1,72 +1,783 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Galactica</title>
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Galactica — Compliance-Aware Planning for Agentic Systems</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:16px}
+body{background:#080C0F;color:#C8CDD4;font-family:'Inter',system-ui,sans-serif;line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+:root{
+  --bg-0:#080C0F;--bg-1:#0D1117;--bg-2:#111820;--bg-3:#141C26;
+  --surface:#182030;--border:#1E2A38;--border-subtle:#1A2535;
+  --text-primary:#E8ECF0;--text-secondary:#A8BAD0;--text-muted:#7A8FA8;--text-dim:#4A5E72;
+  --cyan:#4ECDC4;--cyan-dim:#2A7A75;--cyan-glow:rgba(78,205,196,0.12);
+  --amber:#D4A843;--amber-dim:#7A5F25;
+  --green:#4CAF7D;--green-dim:#265A3E;
+  --red:#C0444A;--red-dim:#6B2529;
+  --mono:'JetBrains Mono',monospace;
+  --radius:4px;--radius-lg:8px;
+}
+.t-overline{font-family:var(--mono);font-size:.82rem;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted)}
+.t-label{font-family:var(--mono);font-size:.80rem;font-weight:400;letter-spacing:.06em;color:var(--text-muted)}
+h1{font-size:clamp(2.2rem,4.5vw,3.8rem);font-weight:600;letter-spacing:-.03em;line-height:1.1;color:var(--text-primary)}
+h2{font-size:clamp(1.7rem,3vw,2.6rem);font-weight:600;letter-spacing:-.025em;line-height:1.15;color:var(--text-primary)}
+h3{font-size:1.1rem;font-weight:600;letter-spacing:-.01em;color:var(--text-primary)}
+p{color:var(--text-secondary);line-height:1.75}
+.container{max-width:1200px;margin:0 auto;padding:0 2rem}
+.section{padding:7rem 0;border-top:1px solid var(--border-subtle)}
+.section-label{display:flex;align-items:center;gap:.75rem;margin-bottom:3rem}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;height:56px;background:rgba(8,12,15,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border-subtle);display:flex;align-items:center}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:1200px;margin:0 auto;padding:0 2rem}
+.nav-logo{display:flex;align-items:center;gap:.625rem;font-family:var(--mono);font-size:.85rem;font-weight:500;color:var(--text-primary);letter-spacing:.04em;text-decoration:none}
+.nav-logo-mark{width:22px;height:22px;background:linear-gradient(135deg,var(--cyan) 0%,var(--cyan-dim) 100%);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%)}
+.nav-links{display:flex;align-items:center;gap:2rem}
+.nav-links a{font-size:.875rem;font-weight:400;color:var(--text-muted);text-decoration:none;letter-spacing:.02em;transition:color .15s}
+.nav-links a:hover{color:var(--text-secondary)}
+.nav-cta{font-family:var(--mono);font-size:.82rem;font-weight:500;padding:.45rem 1rem;background:transparent;border:1px solid var(--cyan-dim);color:var(--cyan);border-radius:var(--radius);cursor:pointer;letter-spacing:.06em;transition:all .15s;text-decoration:none}
+.nav-cta:hover{background:var(--cyan-glow);border-color:var(--cyan)}
+
+/* BUTTONS */
+.btn-primary{display:inline-flex;align-items:center;gap:.5rem;font-family:var(--mono);font-size:.875rem;font-weight:500;padding:.7rem 1.6rem;background:var(--cyan);color:#040810;border:none;border-radius:var(--radius);cursor:pointer;letter-spacing:.06em;text-decoration:none;transition:all .15s;white-space:nowrap}
+.btn-primary:hover{background:#5FD8D0;transform:translateY(-1px)}
+.btn-secondary{display:inline-flex;align-items:center;gap:.5rem;font-family:var(--mono);font-size:.875rem;font-weight:400;padding:.7rem 1.6rem;background:transparent;border:1px solid var(--border);color:var(--text-secondary);border-radius:var(--radius);cursor:pointer;letter-spacing:.06em;text-decoration:none;transition:all .15s;white-space:nowrap}
+.btn-secondary:hover{border-color:var(--text-muted);color:var(--text-primary)}
+
+/* HERO */
+#hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding-top:56px;position:relative;overflow:hidden;border-top:none}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 70% 50% at 60% 40%,rgba(78,205,196,.04) 0%,transparent 70%),radial-gradient(ellipse 40% 40% at 20% 60%,rgba(78,205,196,.025) 0%,transparent 60%)}
+.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;position:relative;z-index:1}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:.5rem;font-family:var(--mono);font-size:.85rem;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--cyan);border:1px solid var(--cyan-dim);padding:.3rem .75rem;border-radius:2px;margin-bottom:1.75rem}
+.hero-eyebrow-dot{width:5px;height:5px;border-radius:50%;background:var(--cyan);animation:pulse-dot 2s infinite}
+@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+.hero-title{margin-bottom:1.25rem}
+.hero-sub{font-size:1rem;font-weight:400;color:var(--text-secondary);line-height:1.65;margin-bottom:1rem}
+.hero-desc{font-size:.875rem;color:var(--text-muted);line-height:1.8;margin-bottom:2.5rem;max-width:520px}
+.hero-actions{display:flex;gap:1rem;align-items:center;flex-wrap:wrap}
+.hero-meta{margin-top:3.5rem;display:flex;gap:2.5rem;padding-top:2rem;border-top:1px solid var(--border-subtle)}
+.hero-stat-value{font-family:var(--mono);font-size:1.35rem;font-weight:500;color:var(--text-primary);letter-spacing:-.02em}
+.hero-stat-label{font-size:.80rem;color:var(--text-muted);letter-spacing:.04em;margin-top:.2rem}
+
+/* HERO GRAPH */
+.hero-right{position:relative}
+.graph-runtime{width:100%;aspect-ratio:1/.85;background:var(--bg-1);border:1px solid var(--border);border-radius:var(--radius-lg);position:relative;overflow:hidden}
+.graph-runtime::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 40%,rgba(78,205,196,.04) 0%,transparent 70%)}
+.gr-header{position:absolute;top:0;left:0;right:0;height:36px;background:rgba(13,17,23,.9);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 1rem;gap:.6rem}
+.gr-dot{width:8px;height:8px;border-radius:50%}
+.gr-dot.active{background:var(--green);box-shadow:0 0 6px var(--green)}
+.gr-dot.pending{background:var(--amber)}
+.gr-dot.idle{background:var(--text-dim)}
+.gr-title{font-family:var(--mono);font-size:.80rem;color:var(--text-muted);letter-spacing:.08em;margin-left:.5rem}
+.gr-status{margin-left:auto;font-family:var(--mono);font-size:.75rem;color:var(--green);letter-spacing:.06em;display:flex;align-items:center;gap:.35rem}
+.gr-status::before{content:'';width:4px;height:4px;border-radius:50%;background:var(--green);animation:pulse-dot 1.5s infinite}
+canvas#heroGraph{position:absolute;top:36px;left:0;right:0;bottom:0;width:100%}
+
+/* PROBLEM */
+.problem-grid{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:start}
+.problem-statements{display:flex;flex-direction:column;gap:0;margin-top:2.5rem}
+.prob-item{display:flex;align-items:flex-start;gap:1.25rem;padding:1.25rem 0;border-bottom:1px solid var(--border-subtle)}
+.prob-item:last-child{border-bottom:none}
+.prob-icon{width:28px;height:28px;flex-shrink:0;margin-top:.1rem;display:flex;align-items:center;justify-content:center;background:rgba(192,68,74,.08);border:1px solid rgba(192,68,74,.2);border-radius:var(--radius)}
+.prob-text h4{font-size:.875rem;font-weight:500;color:var(--text-primary);margin-bottom:.25rem}
+.prob-text p{font-size:.875rem;color:var(--text-muted);line-height:1.6}
+.missing-layer{background:var(--bg-1);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2rem;margin-top:1rem}
+.ml-title{font-family:var(--mono);font-size:.85rem;color:var(--text-muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+.sv-layer{display:flex;align-items:center;gap:1rem;padding:.85rem 1rem;border:1px solid var(--border-subtle);border-radius:var(--radius);margin-bottom:0}
+.sv-layer.missing{border-color:var(--cyan-dim);background:rgba(78,205,196,.04)}
+.sv-arrow{text-align:center;font-family:var(--mono);font-size:.80rem;color:var(--text-muted);padding:.3rem}
+.sv-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.sv-dot.ok{background:var(--green-dim);border:1px solid var(--green)}
+.sv-dot.warn{background:var(--red-dim);border:1px solid var(--red)}
+.sv-dot.highlight{background:var(--cyan);box-shadow:0 0 8px var(--cyan)}
+.sv-name{font-family:var(--mono);font-size:.85rem;color:var(--text-secondary);flex:1}
+.sv-layer.missing .sv-name{color:var(--cyan)}
+.sv-tag{font-family:var(--mono);font-size:.75rem;padding:.15rem .45rem;border-radius:2px;letter-spacing:.06em}
+.sv-tag.red{background:rgba(192,68,74,.15);color:var(--red);border:1px solid rgba(192,68,74,.25)}
+.sv-tag.cyan{background:var(--cyan-glow);color:var(--cyan);border:1px solid var(--cyan-dim)}
+
+/* ARCH */
+#architecture{background:var(--bg-1)}
+.arch-stack{display:grid;grid-template-columns:1fr;gap:0;margin-top:3rem;border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.arch-layer{display:grid;grid-template-columns:2fr 3fr 2fr;align-items:stretch;border-bottom:1px solid var(--border);transition:background .2s;cursor:default}
+.arch-layer:last-child{border-bottom:none}
+.arch-layer:hover{background:rgba(255,255,255,.015)}
+.arch-left{padding:1.5rem;border-right:1px solid var(--border);display:flex;flex-direction:column;justify-content:center}
+.arch-num{font-family:var(--mono);font-size:.75rem;color:var(--text-muted);letter-spacing:.1em;margin-bottom:.4rem}
+.arch-name{font-size:.9rem;font-weight:600;color:var(--text-primary);margin-bottom:.3rem}
+.arch-tag{display:inline-block;font-family:var(--mono);font-size:.75rem;padding:.1rem .4rem;border-radius:2px;border:1px solid var(--border);color:var(--text-muted);letter-spacing:.06em}
+.arch-mid{padding:1.5rem;border-right:1px solid var(--border)}
+.arch-desc{font-size:.875rem;color:var(--text-muted);line-height:1.65;margin-bottom:.75rem}
+.arch-props{display:flex;flex-wrap:wrap;gap:.35rem}
+.arch-prop{font-family:var(--mono);font-size:.75rem;padding:.15rem .5rem;background:var(--bg-0);border:1px solid var(--border);border-radius:2px;color:var(--text-muted);letter-spacing:.04em}
+.arch-right{padding:1.5rem;display:flex;flex-direction:column;justify-content:center;gap:.5rem}
+.arch-state{display:flex;align-items:center;gap:.5rem;font-family:var(--mono);font-size:.80rem}
+.state-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.state-dot.green{background:var(--green)}
+.state-dot.cyan{background:var(--cyan)}
+.state-dot.amber{background:var(--amber)}
+.state-dot.red{background:var(--red)}
+.arch-state span{color:var(--text-muted)}
+
+/* CAPABILITIES */
+.cap-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-top:3rem}
+.cap-card{background:var(--bg-0);padding:2rem;transition:background .2s;position:relative}
+.cap-card:hover{background:var(--bg-1)}
+.cap-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:transparent;transition:background .2s}
+.cap-card:hover::before{background:var(--cyan)}
+.cap-num{font-family:var(--mono);font-size:.80rem;color:var(--text-muted);letter-spacing:.1em;margin-bottom:1.25rem}
+.cap-icon{width:36px;height:36px;margin-bottom:1rem}
+.cap-title{font-size:.9rem;font-weight:600;color:var(--text-primary);margin-bottom:.5rem;line-height:1.3}
+.cap-desc{font-size:.85rem;color:var(--text-muted);line-height:1.65;margin-bottom:1.25rem}
+.cap-props{display:flex;flex-direction:column;gap:.3rem}
+.cap-prop{display:flex;align-items:center;gap:.5rem;font-family:var(--mono);font-size:.70rem;color:var(--text-muted)}
+.cap-prop::before{content:'';width:4px;height:1px;background:var(--cyan-dim);flex-shrink:0}
+
+/* WHY DIFF */
+.diff-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-top:3rem}
+.diff-col{padding:2.5rem;border:1px solid var(--border)}
+.diff-col.old{background:var(--bg-0)}
+.diff-col.new{background:var(--bg-1);border-color:var(--cyan-dim)}
+.diff-header{font-family:var(--mono);font-size:.82rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+.diff-col.old .diff-header{color:var(--text-muted)}
+.diff-col.new .diff-header{color:var(--cyan)}
+.diff-items{display:flex;flex-direction:column;gap:.75rem}
+.diff-item{display:flex;align-items:flex-start;gap:.75rem;font-size:.875rem;line-height:1.55}
+.diff-item .di-mark{width:16px;height:16px;flex-shrink:0;margin-top:.1rem;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:.80rem;font-weight:600}
+.diff-col.old .di-mark{background:rgba(192,68,74,.12);color:var(--red);border:1px solid rgba(192,68,74,.25)}
+.diff-col.new .di-mark{background:rgba(78,205,196,.1);color:var(--cyan);border:1px solid var(--cyan-dim)}
+.diff-col.old .diff-item span{color:var(--text-muted)}
+.diff-col.new .diff-item span{color:var(--text-secondary)}
+.comparison-diagram{margin-top:2rem;display:grid;grid-template-columns:1fr 1fr;gap:2px}
+.dag-box{background:var(--bg-1);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;overflow:hidden}
+.dag-title{font-family:var(--mono);font-size:.80rem;color:var(--text-muted);letter-spacing:.08em;margin-bottom:1rem}
+canvas.dag-canvas{width:100%;height:160px;display:block}
+
+/* REGULATED */
+#regulated{background:var(--bg-1)}
+.reg-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-top:3rem}
+.reg-card{background:var(--bg-1);padding:1.75rem}
+.reg-icon{width:32px;height:32px;background:rgba(78,205,196,.06);border:1px solid var(--cyan-dim);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;margin-bottom:1rem}
+.reg-title{font-size:.85rem;font-weight:600;color:var(--text-primary);margin-bottom:.4rem}
+.reg-desc{font-size:.85rem;color:var(--text-muted);line-height:1.6;margin-bottom:1rem}
+.reg-tags{display:flex;flex-wrap:wrap;gap:.3rem}
+.reg-tag{font-family:var(--mono);font-size:.66rem;padding:.12rem .4rem;background:var(--bg-0);border:1px solid var(--border);border-radius:2px;color:var(--text-muted);letter-spacing:.04em}
+
+/* TRACE */
+.trace-container{background:var(--bg-1);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-top:3rem}
+.trace-header{background:var(--bg-2);border-bottom:1px solid var(--border);padding:.75rem 1.5rem;display:flex;align-items:center;gap:1rem}
+.trace-title{font-family:var(--mono);font-size:.85rem;color:var(--text-secondary);letter-spacing:.08em}
+.trace-id{font-family:var(--mono);font-size:.80rem;color:var(--text-muted);margin-left:auto}
+.trace-body{padding:1.5rem}
+.trace-event{display:grid;grid-template-columns:7rem 1.5rem 1fr;gap:0 1rem;margin-bottom:0}
+.te-time{font-family:var(--mono);font-size:.80rem;color:var(--text-muted);padding-top:.2rem;text-align:right;white-space:nowrap}
+.te-spine{display:flex;flex-direction:column;align-items:center}
+.te-node{width:10px;height:10px;border-radius:50%;flex-shrink:0;border:1px solid;position:relative;z-index:1;margin-top:.2rem}
+.te-line{flex:1;width:1px;background:var(--border);min-height:2rem}
+.te-content{padding-bottom:1.5rem}
+.te-event-name{font-family:var(--mono);font-size:.82rem;font-weight:500;color:var(--text-primary);margin-bottom:.3rem}
+.te-detail{font-size:.85rem;color:var(--text-muted);line-height:1.6;margin-bottom:.5rem}
+.te-meta{display:flex;gap:.5rem;flex-wrap:wrap}
+.te-badge{font-family:var(--mono);font-size:.75rem;padding:.12rem .45rem;border-radius:2px;letter-spacing:.04em}
+.te-badge.info{background:rgba(78,205,196,.08);color:var(--cyan);border:1px solid var(--cyan-dim)}
+.te-badge.warn{background:rgba(212,168,67,.08);color:var(--amber);border:1px solid var(--amber-dim)}
+.te-badge.err{background:rgba(192,68,74,.08);color:var(--red);border:1px solid var(--red-dim)}
+.te-badge.ok{background:rgba(76,175,125,.08);color:var(--green);border:1px solid var(--green-dim)}
+.te-badge.neutral{background:var(--bg-0);color:var(--text-muted);border:1px solid var(--border)}
+
+/* FINAL */
+#final{background:var(--bg-0);text-align:center;position:relative;overflow:hidden}
+#final::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 60% at 50% 50%,rgba(78,205,196,.05) 0%,transparent 70%)}
+.final-inner{position:relative;z-index:1;max-width:680px;margin:0 auto}
+.final-eyebrow{display:inline-flex;align-items:center;gap:.5rem;font-family:var(--mono);font-size:.82rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:2rem}
+.final-sub{font-size:1rem;color:var(--text-muted);line-height:1.75;margin-bottom:2.5rem;max-width:540px;margin-left:auto;margin-right:auto}
+.final-actions{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-bottom:3rem}
+.final-notice{font-family:var(--mono);font-size:.80rem;color:var(--text-muted);letter-spacing:.04em}
+
+/* FOOTER */
+footer{border-top:1px solid var(--border-subtle);padding:2.5rem 0}
+.footer-inner{display:flex;align-items:center;justify-content:space-between}
+.footer-logo{display:flex;align-items:center;gap:.625rem;font-family:var(--mono);font-size:.85rem;color:var(--text-muted);letter-spacing:.04em}
+.footer-logo-mark{width:16px;height:16px;background:linear-gradient(135deg,var(--cyan-dim) 0%,rgba(78,205,196,.3) 100%);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%)}
+.footer-links{display:flex;gap:1.5rem}
+.footer-links a{font-family:var(--mono);font-size:.82rem;color:var(--text-muted);text-decoration:none;letter-spacing:.04em;transition:color .15s}
+.footer-links a:hover{color:var(--text-muted)}
+.footer-copy{font-family:var(--mono);font-size:.80rem;color:var(--text-muted);letter-spacing:.04em}
+.text-cyan{color:var(--cyan)}
+
+@media(max-width:900px){
+  .hero-grid,.problem-grid,.diff-grid,.comparison-diagram{grid-template-columns:1fr}
+  .cap-grid,.reg-grid{grid-template-columns:repeat(2,1fr)}
+  .arch-layer{grid-template-columns:1fr}
+  .arch-left,.arch-mid{border-right:none;border-bottom:1px solid var(--border)}
+  .nav-links{display:none}
+}
+@media(max-width:600px){
+  .cap-grid,.reg-grid{grid-template-columns:1fr}
+  h1{font-size:2rem}h2{font-size:1.6rem}
+}
+</style>
 </head>
 <body>
 
-  <header>
-    <div class="container header-inner">
-      <a href="index.html" class="logo">🌌 Galactica</a>
-      <nav>
-        <a href="index.html">Ana Sayfa</a>
-        <a href="blog/index.html">Blog</a>
-        <a href="#">Haberler</a>
-        <a href="#">Hakkında</a>
-      </nav>
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" href="#">
+      <div class="nav-logo-mark"></div>GALACTICA
+    </a>
+    <div class="nav-links">
+      <a href="#architecture">Architecture</a>
+      <a href="#capabilities">Capabilities</a>
+      <a href="#trace">Execution Trace</a>
+      <a href="#regulated">Use Cases</a>
+      <a href="https://erdemeserekinci.github.io/galactica/blog/index.html" target="_blank" rel="noopener">Docs</a>
     </div>
-  </header>
+    <a class="nav-cta" href="#final">REQUEST ACCESS</a>
+  </div>
+</nav>
 
-  <main class="container">
-
-    <section class="hero">
-      <h1>Fikirler, haberler ve daha fazlası.</h1>
-      <p>Galactica, merak edenler için yazılmış yazıların buluşma noktası.</p>
-    </section>
-
-    <section class="posts">
-
-      <article class="card">
-        <span class="tag">Haber</span>
-        <h2><a href="#">Galactica yayına girdi</a></h2>
-        <p>Projenin ilk gününde neler hedefliyoruz, nereye gidiyoruz? Kısa bir giriş yazısı.</p>
-        <footer class="card-footer">
-          <time>25 Mayıs 2026</time>
-          <a href="#">Devamını oku →</a>
-        </footer>
-      </article>
-
-      <article class="card">
-        <span class="tag">Blog</span>
-        <h2><a href="blog/index.html">Galactica Docs</a></h2>
-        <p>Otonom sistemlerin mimarisi üzerine denemeler — planlama altyapısı, kısıt akıl yürütme ve organizasyonel zeka.</p>
-        <footer class="card-footer">
-          <time>2024–2025</time>
-          <a href="blog/index.html">Tümünü oku →</a>
-        </footer>
-      </article>
-
-      <article class="card">
-        <span class="tag">Blog</span>
-        <h2><a href="#">İkinci yazı için yer tutucu</a></h2>
-        <p>Buraya da bir yazı gelecek. Kart düzeni iki ya da üç sütunla güzel görünüyor.</p>
-        <footer class="card-footer">
-          <time>Yakında</time>
-          <a href="#">Devamını oku →</a>
-        </footer>
-      </article>
-
-    </section>
-  </main>
-
-  <footer class="site-footer">
-    <div class="container">
-      <p>© 2026 Galactica · Tüm hakları saklıdır.</p>
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="container">
+    <div class="hero-grid">
+      <div class="hero-left">
+        <div class="hero-eyebrow"><span class="hero-eyebrow-dot"></span>Planning Kernel v0.9 — Research Preview</div>
+        <h1 class="hero-title">Compliance-Aware<br>Planning for<br><span class="text-cyan">Agentic Systems</span></h1>
+        <p class="hero-sub">Deterministic planning infrastructure for reliable AI operations in regulated environments.</p>
+        <p class="hero-desc">Galactica combines graph-based planning, semantic reasoning, constraint management and LLM-assisted interpretation to enable auditable and explainable AI execution across long-horizon operations.</p>
+        <div class="hero-actions">
+          <a class="btn-primary" href="#final">Request Early Access</a>
+          <a class="btn-secondary" href="#architecture">Read Architecture →</a>
+        </div>
+        <div class="hero-meta">
+          <div class="hero-stat"><div class="hero-stat-value">6</div><div class="hero-stat-label">Planning Layers</div></div>
+          <div class="hero-stat"><div class="hero-stat-value">100%</div><div class="hero-stat-label">Deterministic</div></div>
+          <div class="hero-stat"><div class="hero-stat-value">∞</div><div class="hero-stat-label">Horizon Memory</div></div>
+          <div class="hero-stat"><div class="hero-stat-value text-cyan">Live</div><div class="hero-stat-label">Replanning</div></div>
+        </div>
+      </div>
+      <div class="hero-right">
+        <div class="graph-runtime">
+          <div class="gr-header">
+            <div class="gr-dot active"></div>
+            <div class="gr-dot pending"></div>
+            <div class="gr-dot idle"></div>
+            <span class="gr-title">planner.runtime — graph:active</span>
+            <span class="gr-status">LIVE EXECUTION</span>
+          </div>
+          <canvas id="heroGraph"></canvas>
+        </div>
+      </div>
     </div>
-  </footer>
+  </div>
+</section>
 
+<!-- PROBLEM -->
+<section class="section" id="problem">
+  <div class="container">
+    <div class="section-label"><span class="t-overline">§ 01 — The Problem</span></div>
+    <div class="problem-grid">
+      <div class="problem-left">
+        <h2>Modern AI agents<br>fail at consistency.</h2>
+        <p style="margin-top:1.25rem;font-size:.9rem">Current agentic frameworks are built on probabilistic foundations — they chain prompts, route tools, and hope the LLM stays on track. In regulated enterprise environments, hope is not an operational primitive.</p>
+        <div class="problem-statements">
+          <div class="prob-item">
+            <div class="prob-icon"><svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M7 1L1 5v4l6 4 6-4V5L7 1z" stroke="#C0444A" stroke-width="1.2" stroke-linejoin="round"/></svg></div>
+            <div class="prob-text"><h4>Non-deterministic execution</h4><p>Same input, different outcomes. No repeatability guarantee. Impossible to audit or certify.</p></div>
+          </div>
+          <div class="prob-item">
+            <div class="prob-icon"><svg width="14" height="14" fill="none" viewBox="0 0 14 14"><circle cx="7" cy="7" r="5.5" stroke="#C0444A" stroke-width="1.2"/><path d="M7 4v3.5L9 9" stroke="#C0444A" stroke-width="1.2" stroke-linecap="round"/></svg></div>
+            <div class="prob-text"><h4>No long-horizon coherence</h4><p>Context windows expire. Goals drift. Operational state is lost. Multi-step execution degrades silently.</p></div>
+          </div>
+          <div class="prob-item">
+            <div class="prob-icon"><svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M2 7h10M2 7l3-3M2 7l3 3" stroke="#C0444A" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="prob-text"><h4>Constraint blindness</h4><p>Frameworks execute what's possible, not what's permissible. Regulatory constraints are afterthoughts.</p></div>
+          </div>
+          <div class="prob-item">
+            <div class="prob-icon"><svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M7 2v2M7 10v2M2 7h2M10 7h2" stroke="#C0444A" stroke-width="1.2" stroke-linecap="round"/><circle cx="7" cy="7" r="2.5" stroke="#C0444A" stroke-width="1.2"/></svg></div>
+            <div class="prob-text"><h4>Opaque decision paths</h4><p>When something goes wrong, there's no trace. No reasoning chain. No accountability layer.</p></div>
+          </div>
+        </div>
+      </div>
+      <div class="problem-right">
+        <p style="font-family:var(--mono);font-size:.80rem;color:var(--text-muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:.75rem">The missing layer</p>
+        <h3 style="margin-bottom:1rem;color:var(--text-secondary)">Planning is the missing layer between LLMs and reliable enterprise operations.</h3>
+        <p style="font-size:.82rem;color:var(--text-muted);margin-bottom:1.75rem;line-height:1.7">Orchestration frameworks give you tool routing and prompt chaining. What they don't give you is a reasoning engine that understands goals, evaluates constraints, maintains state, and produces explainable decisions — deterministically.</p>
+        <div class="missing-layer">
+          <div class="ml-title">Current Agent Stack — Diagnostic</div>
+          <div class="stack-visual">
+            <div class="sv-layer"><div class="sv-dot ok"></div><span class="sv-name">LLM Inference</span><span class="sv-tag">operational</span></div>
+            <div class="sv-arrow">↓</div>
+            <div class="sv-layer"><div class="sv-dot ok"></div><span class="sv-name">Prompt Orchestration</span><span class="sv-tag">operational</span></div>
+            <div class="sv-arrow">↓</div>
+            <div class="sv-layer missing"><div class="sv-dot highlight"></div><span class="sv-name">Planning Kernel ← missing</span><span class="sv-tag cyan">ABSENT</span></div>
+            <div class="sv-arrow">↓</div>
+            <div class="sv-layer"><div class="sv-dot warn"></div><span class="sv-name">Constraint Evaluation</span><span class="sv-tag red">ABSENT</span></div>
+            <div class="sv-arrow">↓</div>
+            <div class="sv-layer"><div class="sv-dot warn"></div><span class="sv-name">Execution Memory</span><span class="sv-tag red">ABSENT</span></div>
+            <div class="sv-arrow">↓</div>
+            <div class="sv-layer"><div class="sv-dot ok"></div><span class="sv-name">Tool / API Runtime</span><span class="sv-tag">operational</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ARCHITECTURE -->
+<section class="section" id="architecture">
+  <div class="container">
+    <div class="section-label"><span class="t-overline">§ 02 — Architecture</span></div>
+    <div style="display:grid;grid-template-columns:1fr 2fr;gap:3rem;align-items:start;margin-bottom:2rem">
+      <div><h2>The Planning Stack</h2></div>
+      <div><p style="font-size:.875rem;color:var(--text-muted);line-height:1.75">Galactica is structured as a layered kernel. Each layer has defined inputs, outputs, state contracts and observable telemetry. The stack is designed for deterministic composition — every transition is logged, versioned and replayable.</p></div>
+    </div>
+    <div class="arch-stack">
+      <div class="arch-layer">
+        <div class="arch-left"><div class="arch-num">LAYER 01</div><div class="arch-name">LLM Layer</div><div class="arch-tag">inference</div></div>
+        <div class="arch-mid"><div class="arch-desc">Probabilistic language model inference. Accepts structured prompts, returns natural language with embedded structured signals. Sandboxed from core planning logic.</div><div class="arch-props"><span class="arch-prop">streaming</span><span class="arch-prop">structured-output</span><span class="arch-prop">retry-policy</span><span class="arch-prop">token-budget</span></div></div>
+        <div class="arch-right"><div class="arch-state"><div class="state-dot green"></div><span>model.ready</span></div><div class="arch-state"><div class="state-dot amber"></div><span>temperature: 0.1</span></div><div class="arch-state"><div class="state-dot cyan"></div><span>output: structured</span></div></div>
+      </div>
+      <div class="arch-layer">
+        <div class="arch-left"><div class="arch-num">LAYER 02</div><div class="arch-name">Interpretation Layer</div><div class="arch-tag">semantic parsing</div></div>
+        <div class="arch-mid"><div class="arch-desc">Translates LLM outputs into typed semantic objects — goals, constraints, entities, roles. Validates against domain schemas. Bridges probabilistic language and deterministic planning.</div><div class="arch-props"><span class="arch-prop">entity-extraction</span><span class="arch-prop">intent-classification</span><span class="arch-prop">schema-validation</span><span class="arch-prop">confidence-scoring</span></div></div>
+        <div class="arch-right"><div class="arch-state"><div class="state-dot green"></div><span>parse.ok</span></div><div class="arch-state"><div class="state-dot cyan"></div><span>entities: 12</span></div><div class="arch-state"><div class="state-dot amber"></div><span>confidence: 0.94</span></div></div>
+      </div>
+      <div class="arch-layer">
+        <div class="arch-left"><div class="arch-num">LAYER 03</div><div class="arch-name">Constraint Engine</div><div class="arch-tag">policy enforcement</div></div>
+        <div class="arch-mid"><div class="arch-desc">Evaluates operational constraints against proposed plan states. Enforces compliance rules, organizational policies and domain-specific boundaries before any action is dispatched.</div><div class="arch-props"><span class="arch-prop">rule-evaluation</span><span class="arch-prop">policy-binding</span><span class="arch-prop">violation-detection</span><span class="arch-prop">pre-action-gate</span></div></div>
+        <div class="arch-right"><div class="arch-state"><div class="state-dot green"></div><span>rules.loaded: 47</span></div><div class="arch-state"><div class="state-dot red"></div><span>violations: 1</span></div><div class="arch-state"><div class="state-dot amber"></div><span>blocked: replanning</span></div></div>
+      </div>
+      <div class="arch-layer">
+        <div class="arch-left"><div class="arch-num">LAYER 04</div><div class="arch-name">Deterministic Planner</div><div class="arch-tag">core kernel</div></div>
+        <div class="arch-mid"><div class="arch-desc">The planning kernel. Generates, scores and selects execution paths using goal hierarchies, role assignments and operational feasibility. Plans are versioned, diffable and replayable.</div><div class="arch-props"><span class="arch-prop">goal-decomposition</span><span class="arch-prop">path-search</span><span class="arch-prop">role-task-binding</span><span class="arch-prop">plan-versioning</span><span class="arch-prop">replan-trigger</span></div></div>
+        <div class="arch-right"><div class="arch-state"><div class="state-dot cyan"></div><span>plan.v3 active</span></div><div class="arch-state"><div class="state-dot green"></div><span>paths: 6</span></div><div class="arch-state"><div class="state-dot amber"></div><span>replanned: 2x</span></div></div>
+      </div>
+      <div class="arch-layer">
+        <div class="arch-left"><div class="arch-num">LAYER 05</div><div class="arch-name">Graph Memory</div><div class="arch-tag">semantic state</div></div>
+        <div class="arch-mid"><div class="arch-desc">Persistent semantic graph storing operational state, entity relationships, decision history and evidence trails. Enables long-horizon coherence and cross-session continuity independent of context windows.</div><div class="arch-props"><span class="arch-prop">graph-rag</span><span class="arch-prop">entity-persistence</span><span class="arch-prop">decision-history</span><span class="arch-prop">cross-session</span><span class="arch-prop">time-indexed</span></div></div>
+        <div class="arch-right"><div class="arch-state"><div class="state-dot green"></div><span>nodes: 2,847</span></div><div class="arch-state"><div class="state-dot cyan"></div><span>edges: 11,203</span></div><div class="arch-state"><div class="state-dot green"></div><span>sessions: persisted</span></div></div>
+      </div>
+      <div class="arch-layer">
+        <div class="arch-left"><div class="arch-num">LAYER 06</div><div class="arch-name">Execution Runtime</div><div class="arch-tag">dispatch</div></div>
+        <div class="arch-mid"><div class="arch-desc">Dispatches approved plan steps to tools, APIs and agents. Monitors execution outcomes, surfaces state changes back to the planner, and records complete audit trails for every dispatched action.</div><div class="arch-props"><span class="arch-prop">step-dispatch</span><span class="arch-prop">outcome-monitoring</span><span class="arch-prop">feedback-loop</span><span class="arch-prop">audit-trail</span><span class="arch-prop">retry-policy</span></div></div>
+        <div class="arch-right"><div class="arch-state"><div class="state-dot green"></div><span>runtime: active</span></div><div class="arch-state"><div class="state-dot cyan"></div><span>steps: 14 done</span></div><div class="arch-state"><div class="state-dot green"></div><span>audit: complete</span></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CAPABILITIES -->
+<section class="section" id="capabilities">
+  <div class="container">
+    <div class="section-label"><span class="t-overline">§ 03 — Core Capabilities</span></div>
+    <div style="display:grid;grid-template-columns:1fr 2fr;gap:3rem;align-items:start;margin-bottom:0">
+      <div><h2>Infrastructure Primitives</h2></div>
+      <div><p style="font-size:.875rem;color:var(--text-muted);line-height:1.75">Not features. Not toggles. These are the fundamental building blocks of a planning-capable agentic system — each one a first-class operational primitive with defined semantics, telemetry and runtime guarantees.</p></div>
+    </div>
+    <div class="cap-grid">
+      <div class="cap-card">
+        <div class="cap-num">CAP-01</div>
+        <svg class="cap-icon" viewBox="0 0 36 36" fill="none"><rect x="4" y="4" width="28" height="28" rx="2" stroke="var(--cyan-dim)" stroke-width="1.2"/><path d="M4 14h28M14 4v28" stroke="var(--cyan-dim)" stroke-width="1.2"/><circle cx="22" cy="22" r="3" fill="var(--cyan)" opacity=".6"/></svg>
+        <div class="cap-title">Constraint-Aware Planning</div>
+        <div class="cap-desc">Plans generated under explicit operational constraints. Every plan step is evaluated against a binding constraint set before dispatch. Violations trigger replanning, not failures.</div>
+        <div class="cap-props"><div class="cap-prop">pre-condition evaluation</div><div class="cap-prop">policy-binding per step</div><div class="cap-prop">violation → replan signal</div><div class="cap-prop">constraint versioning</div></div>
+      </div>
+      <div class="cap-card">
+        <div class="cap-num">CAP-02</div>
+        <svg class="cap-icon" viewBox="0 0 36 36" fill="none"><circle cx="10" cy="10" r="3" stroke="var(--cyan-dim)" stroke-width="1.2"/><circle cx="26" cy="10" r="3" stroke="var(--cyan-dim)" stroke-width="1.2"/><circle cx="18" cy="26" r="3" stroke="var(--cyan-dim)" stroke-width="1.2"/><path d="M13 10h10M12 13l4 10M24 13l-4 10" stroke="var(--cyan-dim)" stroke-width="1.2"/></svg>
+        <div class="cap-title">Graph-Native Execution Memory</div>
+        <div class="cap-desc">Persistent semantic state across long-running operations. Goals, entities, decisions and evidence are stored as a typed graph — queryable, diffable and cross-session persistent.</div>
+        <div class="cap-props"><div class="cap-prop">session-independent state</div><div class="cap-prop">typed entity graph</div><div class="cap-prop">temporal indexing</div><div class="cap-prop">semantic traversal</div></div>
+      </div>
+      <div class="cap-card">
+        <div class="cap-num">CAP-03</div>
+        <svg class="cap-icon" viewBox="0 0 36 36" fill="none"><path d="M6 30V10l12-6 12 6v20" stroke="var(--cyan-dim)" stroke-width="1.2" stroke-linejoin="round"/><path d="M14 30v-8h8v8" stroke="var(--cyan-dim)" stroke-width="1.2" stroke-linejoin="round"/><path d="M10 14h2M24 14h2M10 19h2M24 19h2" stroke="var(--cyan)" stroke-width="1.2" stroke-linecap="round" opacity=".6"/></svg>
+        <div class="cap-title">Explainable Decision Traces</div>
+        <div class="cap-desc">Every decision is linked to goals, constraints and evidence. Full reasoning chains stored as immutable trace records — queryable by regulators, auditors and operators.</div>
+        <div class="cap-props"><div class="cap-prop">goal-linked decisions</div><div class="cap-prop">evidence references</div><div class="cap-prop">immutable trace log</div><div class="cap-prop">regulator export</div></div>
+      </div>
+      <div class="cap-card">
+        <div class="cap-num">CAP-04</div>
+        <svg class="cap-icon" viewBox="0 0 36 36" fill="none"><rect x="4" y="4" width="12" height="8" rx="1.5" stroke="var(--cyan-dim)" stroke-width="1.2"/><rect x="20" y="4" width="12" height="8" rx="1.5" stroke="var(--cyan-dim)" stroke-width="1.2"/><rect x="12" y="22" width="12" height="10" rx="1.5" stroke="var(--cyan)" stroke-width="1.2" opacity=".8"/><path d="M10 12v4l16 0v-4M18 16v6" stroke="var(--cyan-dim)" stroke-width="1.2"/></svg>
+        <div class="cap-title">Role–Goal–Task Modeling</div>
+        <div class="cap-desc">Native organizational reasoning. Roles, responsibilities, approval hierarchies and task ownership are first-class planning objects — not configuration knobs.</div>
+        <div class="cap-props"><div class="cap-prop">org-hierarchy aware</div><div class="cap-prop">role-permission binding</div><div class="cap-prop">approval chain modeling</div><div class="cap-prop">delegation inference</div></div>
+      </div>
+      <div class="cap-card">
+        <div class="cap-num">CAP-05</div>
+        <svg class="cap-icon" viewBox="0 0 36 36" fill="none"><path d="M18 6c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12" stroke="var(--cyan-dim)" stroke-width="1.2" stroke-linecap="round"/><path d="M24 6l6 0 0 6" stroke="var(--cyan)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M30 6l-8 8" stroke="var(--cyan)" stroke-width="1.2" stroke-linecap="round"/><circle cx="18" cy="18" r="3" fill="var(--cyan)" opacity=".4"/></svg>
+        <div class="cap-title">Dynamic Replanning</div>
+        <div class="cap-desc">Adaptive execution under changing operational state. When constraints are violated or state drifts, the planner generates an updated plan — not a crash. Replanning events are logged and explainable.</div>
+        <div class="cap-props"><div class="cap-prop">state-drift detection</div><div class="cap-prop">incremental replan</div><div class="cap-prop">plan diff recording</div><div class="cap-prop">continuity guarantee</div></div>
+      </div>
+      <div class="cap-card">
+        <div class="cap-num">CAP-06</div>
+        <svg class="cap-icon" viewBox="0 0 36 36" fill="none"><circle cx="18" cy="18" r="5" stroke="var(--cyan)" stroke-width="1.2" opacity=".8"/><circle cx="8" cy="10" r="2.5" stroke="var(--cyan-dim)" stroke-width="1.2"/><circle cx="28" cy="10" r="2.5" stroke="var(--cyan-dim)" stroke-width="1.2"/><circle cx="8" cy="26" r="2.5" stroke="var(--cyan-dim)" stroke-width="1.2"/><circle cx="28" cy="26" r="2.5" stroke="var(--cyan-dim)" stroke-width="1.2"/><path d="M10.5 11.5l5.5 4.5M25.5 11.5l-5.5 4.5M10.5 24.5l5.5-4.5M25.5 24.5l-5.5-4.5" stroke="var(--cyan-dim)" stroke-width="1" stroke-linecap="round"/></svg>
+        <div class="cap-title">GraphRAG Integration</div>
+        <div class="cap-desc">Semantic retrieval directly connected to planning. The planner queries the knowledge graph during goal evaluation — not after. Retrieval context influences plan generation, not just LLM prompts.</div>
+        <div class="cap-props"><div class="cap-prop">planning-time retrieval</div><div class="cap-prop">entity-anchored search</div><div class="cap-prop">evidence injection</div><div class="cap-prop">context versioning</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY DIFFERENT -->
+<section class="section" id="why">
+  <div class="container">
+    <div class="section-label"><span class="t-overline">§ 04 — Differentiation</span></div>
+    <div style="max-width:600px;margin-bottom:3rem">
+      <h2>Orchestration is<br>not planning.</h2>
+      <p style="margin-top:1.25rem;font-size:.9rem;line-height:1.75">Most frameworks give you a directed acyclic graph of prompt calls. Galactica gives you a reasoning kernel that understands what you're trying to achieve and why — and generates execution paths accordingly.</p>
+    </div>
+    <div class="diff-grid">
+      <div class="diff-col old">
+        <div class="diff-header">Orchestration Frameworks</div>
+        <div class="diff-items">
+          <div class="diff-item"><div class="di-mark">✕</div><span>Route tool calls in predefined DAGs</span></div>
+          <div class="diff-item"><div class="di-mark">✕</div><span>Chain prompts without goal modeling</span></div>
+          <div class="diff-item"><div class="di-mark">✕</div><span>No operational constraint semantics</span></div>
+          <div class="diff-item"><div class="di-mark">✕</div><span>State resets per session boundary</span></div>
+          <div class="diff-item"><div class="di-mark">✕</div><span>LLM decides what happens next</span></div>
+          <div class="diff-item"><div class="di-mark">✕</div><span>No organizational role awareness</span></div>
+          <div class="diff-item"><div class="di-mark">✕</div><span>Failure = exception, not adaptation</span></div>
+          <div class="diff-item"><div class="di-mark">✕</div><span>Decisions are not explainable</span></div>
+        </div>
+      </div>
+      <div class="diff-col new">
+        <div class="diff-header">Galactica</div>
+        <div class="diff-items">
+          <div class="diff-item"><div class="di-mark">✓</div><span>Reasons over goal hierarchies and feasibility</span></div>
+          <div class="diff-item"><div class="di-mark">✓</div><span>Generates plans from semantic intent</span></div>
+          <div class="diff-item"><div class="di-mark">✓</div><span>First-class constraint evaluation engine</span></div>
+          <div class="diff-item"><div class="di-mark">✓</div><span>Persistent graph memory across all sessions</span></div>
+          <div class="diff-item"><div class="di-mark">✓</div><span>Planner decides, LLM interprets</span></div>
+          <div class="diff-item"><div class="di-mark">✓</div><span>Role–goal–task as native data model</span></div>
+          <div class="diff-item"><div class="di-mark">✓</div><span>Failure = replan signal with trace</span></div>
+          <div class="diff-item"><div class="di-mark">✓</div><span>Every decision traceable to goal + evidence</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="comparison-diagram">
+      <div class="dag-box">
+        <div class="dag-title">Traditional Workflow DAG</div>
+        <canvas class="dag-canvas" id="dagOld"></canvas>
+      </div>
+      <div class="dag-box" style="border-color:var(--cyan-dim)">
+        <div class="dag-title" style="color:var(--cyan)">Galactica Semantic Planning Graph</div>
+        <canvas class="dag-canvas" id="dagNew"></canvas>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- REGULATED -->
+<section class="section" id="regulated">
+  <div class="container">
+    <div class="section-label"><span class="t-overline">§ 05 — Regulated Environments</span></div>
+    <div style="display:grid;grid-template-columns:1fr 2fr;gap:3rem;align-items:start;margin-bottom:0">
+      <div><h2>Built for operationally constrained environments.</h2></div>
+      <div><p style="font-size:.875rem;color:var(--text-muted);line-height:1.75">Galactica is engineered for environments where decisions have legal, financial and operational consequences. Every design decision prioritises auditability, constraint fidelity and institutional trust over throughput.</p></div>
+    </div>
+    <div class="reg-grid">
+      <div class="reg-card">
+        <div class="reg-icon"><svg width="16" height="16" fill="none" viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="12" rx="1.5" stroke="var(--cyan)" stroke-width="1.2"/><path d="M5 8h6M5 5.5h6M5 10.5h4" stroke="var(--cyan)" stroke-width="1.1" stroke-linecap="round"/></svg></div>
+        <div class="reg-title">Financial Compliance</div>
+        <div class="reg-desc">KYC/AML workflows, regulatory filing, transaction approval — all executed under binding policy constraints with complete audit trails.</div>
+        <div class="reg-tags"><span class="reg-tag">AML</span><span class="reg-tag">KYC</span><span class="reg-tag">PEP screening</span><span class="reg-tag">SAR generation</span></div>
+      </div>
+      <div class="reg-card">
+        <div class="reg-icon"><svg width="16" height="16" fill="none" viewBox="0 0 16 16"><circle cx="8" cy="5" r="2.5" stroke="var(--cyan)" stroke-width="1.2"/><path d="M3 14c0-2.761 2.239-5 5-5s5 2.239 5 5" stroke="var(--cyan)" stroke-width="1.2" stroke-linecap="round"/></svg></div>
+        <div class="reg-title">Onboarding Operations</div>
+        <div class="reg-desc">Multi-step customer onboarding with identity verification, document review, risk scoring and approval — coordinated as a single plannable operation.</div>
+        <div class="reg-tags"><span class="reg-tag">identity verification</span><span class="reg-tag">doc review</span><span class="reg-tag">risk scoring</span></div>
+      </div>
+      <div class="reg-card">
+        <div class="reg-icon"><svg width="16" height="16" fill="none" viewBox="0 0 16 16"><path d="M8 2l1.5 4.5H14l-3.5 2.5 1.5 4.5L8 11l-4 2.5 1.5-4.5L2 6.5h4.5L8 2z" stroke="var(--cyan)" stroke-width="1.1" stroke-linejoin="round"/></svg></div>
+        <div class="reg-title">Approval Systems</div>
+        <div class="reg-desc">Hierarchical approval workflows with role-based routing, escalation logic and SLA-aware planning. Every approval is linked to the decision trace.</div>
+        <div class="reg-tags"><span class="reg-tag">role-routing</span><span class="reg-tag">escalation</span><span class="reg-tag">SLA tracking</span></div>
+      </div>
+      <div class="reg-card">
+        <div class="reg-icon"><svg width="16" height="16" fill="none" viewBox="0 0 16 16"><path d="M13 5H3a1 1 0 00-1 1v7a1 1 0 001 1h10a1 1 0 001-1V6a1 1 0 00-1-1z" stroke="var(--cyan)" stroke-width="1.2"/><path d="M5 5V4a3 3 0 016 0v1" stroke="var(--cyan)" stroke-width="1.2" stroke-linecap="round"/></svg></div>
+        <div class="reg-title">Dispute Operations</div>
+        <div class="reg-desc">End-to-end dispute management with evidence gathering, policy evaluation, decision generation and regulatory reporting — fully planned and traceable.</div>
+        <div class="reg-tags"><span class="reg-tag">evidence graph</span><span class="reg-tag">policy eval</span><span class="reg-tag">reg reporting</span></div>
+      </div>
+      <div class="reg-card">
+        <div class="reg-icon"><svg width="16" height="16" fill="none" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5" stroke="var(--cyan)" stroke-width="1.2"/><path d="M8 5v3.5l2 1.5" stroke="var(--cyan)" stroke-width="1.2" stroke-linecap="round"/></svg></div>
+        <div class="reg-title">Policy Enforcement</div>
+        <div class="reg-desc">Real-time policy evaluation at every plan step. Rules are versioned, testable and auditable. Policy changes propagate to live plan evaluations without redeployment.</div>
+        <div class="reg-tags"><span class="reg-tag">real-time eval</span><span class="reg-tag">rule versioning</span><span class="reg-tag">hot propagation</span></div>
+      </div>
+      <div class="reg-card">
+        <div class="reg-icon"><svg width="16" height="16" fill="none" viewBox="0 0 16 16"><path d="M8 2L2 5v4c0 3.5 2.5 5.5 6 7 3.5-1.5 6-3.5 6-7V5L8 2z" stroke="var(--cyan)" stroke-width="1.2" stroke-linejoin="round"/></svg></div>
+        <div class="reg-title">Audit &amp; Explainability</div>
+        <div class="reg-desc">Complete decision audit trails for every operation. Every action, decision and constraint evaluation is recorded, timestamped and exportable for regulatory review.</div>
+        <div class="reg-tags"><span class="reg-tag">decision log</span><span class="reg-tag">regulator export</span><span class="reg-tag">trace replay</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EXECUTION TRACE -->
+<section class="section" id="trace">
+  <div class="container">
+    <div class="section-label"><span class="t-overline">§ 06 — Execution Trace</span></div>
+    <div style="display:grid;grid-template-columns:1fr 2fr;gap:3rem;align-items:start;margin-bottom:0">
+      <div><h2>Explainable operational intelligence.</h2></div>
+      <div><p style="font-size:.875rem;color:var(--text-muted);line-height:1.75">The following trace was recorded during a live KYC ownership change operation. Every event, constraint evaluation and replanning decision is captured with full semantic context — not just logs.</p></div>
+    </div>
+    <div class="trace-container">
+      <div class="trace-header">
+        <div class="gr-dot active"></div>
+        <div class="trace-title">EXECUTION TRACE — KYC Ownership Change Operation</div>
+        <div class="trace-id">trace_id: dp-8f3a2c1e · plan_v: 3 · duration: 847ms</div>
+      </div>
+      <div class="trace-body">
+        <div class="trace-event">
+          <div class="te-time">09:14:02.104</div>
+          <div class="te-spine"><div class="te-node" style="border-color:var(--cyan);background:rgba(78,205,196,.2)"></div><div class="te-line"></div></div>
+          <div class="te-content">
+            <div class="te-event-name">OWNERSHIP_CHANGE_DETECTED</div>
+            <div class="te-detail">Beneficial ownership update received for entity ENT-4421 (Nexara Capital Ltd). New UBO declared: 34.7% stake transfer. Semantic parser extracts 4 entities, 2 relationship changes.</div>
+            <div class="te-meta"><span class="te-badge info">entity: ENT-4421</span><span class="te-badge neutral">parser: v2.1</span><span class="te-badge neutral">entities_extracted: 4</span></div>
+          </div>
+        </div>
+        <div class="trace-event">
+          <div class="te-time">09:14:02.218</div>
+          <div class="te-spine"><div class="te-node" style="border-color:var(--amber);background:rgba(212,168,67,.2)"></div><div class="te-line"></div></div>
+          <div class="te-content">
+            <div class="te-event-name">RISK_SIGNAL_GENERATED</div>
+            <div class="te-detail">GraphRAG query against entity graph surfaces risk context. New UBO (person: PRN-9183) linked to 2 high-risk jurisdictions and 1 pending PEP screening record. Risk score: 0.78 (elevated).</div>
+            <div class="te-meta"><span class="te-badge warn">risk_score: 0.78</span><span class="te-badge warn">ubo: PRN-9183</span><span class="te-badge neutral">graph_query: 12ms</span></div>
+          </div>
+        </div>
+        <div class="trace-event">
+          <div class="te-time">09:14:02.331</div>
+          <div class="te-spine"><div class="te-node" style="border-color:var(--red);background:rgba(192,68,74,.2)"></div><div class="te-line"></div></div>
+          <div class="te-content">
+            <div class="te-event-name">CONSTRAINT_VIOLATION — RULE-AML-047</div>
+            <div class="te-detail">Constraint engine evaluates plan against active ruleset. RULE-AML-047 triggers: "Enhanced Due Diligence mandatory for UBOs with risk_score &gt; 0.65 in FATF non-compliant jurisdictions." Original plan path BLOCKED.</div>
+            <div class="te-meta"><span class="te-badge err">rule: AML-047</span><span class="te-badge err">plan_v1: BLOCKED</span><span class="te-badge neutral">rules_evaluated: 47</span></div>
+          </div>
+        </div>
+        <div class="trace-event">
+          <div class="te-time">09:14:02.389</div>
+          <div class="te-spine"><div class="te-node" style="border-color:var(--amber);background:rgba(212,168,67,.2)"></div><div class="te-line"></div></div>
+          <div class="te-content">
+            <div class="te-event-name">REPLAN_TRIGGERED — constraint_violation</div>
+            <div class="te-detail">Planner receives violation signal. Evaluates 3 alternative execution paths. Path 2 satisfies AML-047 by inserting EDD workflow gate. Plan updated to v2. GraphRAG retrieves EDD policy document (DOC-EDD-2024-11) as execution context.</div>
+            <div class="te-meta"><span class="te-badge warn">plan: v1→v2</span><span class="te-badge info">alt_paths_evaluated: 3</span><span class="te-badge info">context: DOC-EDD-2024-11</span></div>
+          </div>
+        </div>
+        <div class="trace-event">
+          <div class="te-time">09:14:02.451</div>
+          <div class="te-spine"><div class="te-node" style="border-color:var(--cyan);background:rgba(78,205,196,.2)"></div><div class="te-line"></div></div>
+          <div class="te-content">
+            <div class="te-event-name">ROLE_ASSIGNMENT — compliance_officer</div>
+            <div class="te-detail">Plan v2 assigns EDD review task to role: COMPLIANCE_OFFICER. Role-goal-task model resolves assignment to agent group: CMP-EMEA-TEAM. Estimated SLA: 4h. Escalation policy: auto-escalate to HEAD_COMPLIANCE at SLA +2h.</div>
+            <div class="te-meta"><span class="te-badge info">role: COMPLIANCE_OFFICER</span><span class="te-badge info">group: CMP-EMEA-TEAM</span><span class="te-badge neutral">sla: 4h</span></div>
+          </div>
+        </div>
+        <div class="trace-event">
+          <div class="te-time">09:14:02.562</div>
+          <div class="te-spine"><div class="te-node" style="border-color:var(--green);background:rgba(76,175,125,.2)"></div><div class="te-line"></div></div>
+          <div class="te-content">
+            <div class="te-event-name">PLAN_DISPATCHED — v2 active</div>
+            <div class="te-detail">Plan v2 dispatched to execution runtime. 6 steps queued. EDD gate inserted at step 3. Trace recorded and linked to entity graph node ENT-4421. Audit record written to immutable log.</div>
+            <div class="te-meta"><span class="te-badge ok">plan_v2: dispatched</span><span class="te-badge ok">steps: 6</span><span class="te-badge ok">audit: written</span><span class="te-badge neutral">trace: dp-8f3a2c1e</span></div>
+          </div>
+        </div>
+        <div class="trace-event">
+          <div class="te-time">09:14:02.571</div>
+          <div class="te-spine"><div class="te-node" style="border-color:var(--green);background:rgba(76,175,125,.3)"></div></div>
+          <div class="te-content" style="padding-bottom:0">
+            <div class="te-event-name">TRACE_COMPLETE — decision linked to goal, constraint and evidence</div>
+            <div class="te-detail">Full reasoning chain available. Goal: complete_kyc_ownership_update. Constraint: AML-047. Evidence: PRN-9183 risk profile + DOC-EDD-2024-11. Decision: insert_edd_gate. Duration: 467ms.</div>
+            <div class="te-meta"><span class="te-badge ok">goal: kyc_ownership_update</span><span class="te-badge ok">constraint: AML-047</span><span class="te-badge ok">duration: 467ms</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="section" id="final">
+  <div class="container">
+    <div class="final-inner">
+      <div class="final-eyebrow">Research Preview — Limited Access</div>
+      <h2 style="margin-bottom:1.25rem">The infrastructure layer<br>for reliable agent systems.</h2>
+      <p class="final-sub">Galactica is designed as a foundational planning kernel for next-generation enterprise AI platforms. We are onboarding a limited number of design partners from financial services and regulated operations.</p>
+      <div class="final-actions">
+        <a class="btn-primary" href="mailto:hello@galactica.ai">Schedule Technical Demo</a>
+        <a class="btn-secondary" href="#">Access Research Preview →</a>
+      </div>
+      <div class="final-notice">Not a chatbot wrapper. Not a workflow tool. A planning kernel.</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-logo"><div class="footer-logo-mark"></div>GALACTICA</div>
+      <div class="footer-links"><a href="#">Architecture</a><a href="#">Research</a><a href="https://erdemeserekinci.github.io/galactica/blog/index.html" target="_blank" rel="noopener">Docs</a><a href="#">Status</a><a href="#">Contact</a></div>
+      <div class="footer-copy">© 2025 Galactica</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+
+  // roundRect polyfill for older browsers
+  if(!CanvasRenderingContext2D.prototype.roundRect){
+    CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){
+      this.moveTo(x+r,y);this.lineTo(x+w-r,y);this.quadraticCurveTo(x+w,y,x+w,y+r);
+      this.lineTo(x+w,y+h-r);this.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+      this.lineTo(x+r,y+h);this.quadraticCurveTo(x,y+h,x,y+h-r);
+      this.lineTo(x,y+r);this.quadraticCurveTo(x,y,x+r,y);this.closePath();
+    };
+  }
+
+// HERO GRAPH
+(function(){
+  const canvas=document.getElementById('heroGraph');
+  if(!canvas)return;
+  const dpr=window.devicePixelRatio||1;
+  function resize(){
+    const rect=canvas.parentElement.getBoundingClientRect();
+    const h=rect.height-36;
+    canvas.width=rect.width*dpr;canvas.height=h*dpr;
+    canvas.style.width=rect.width+'px';canvas.style.height=h+'px';
+  }
+  resize();window.addEventListener('resize',resize);
+  const ctx=canvas.getContext('2d');
+  const CYAN='#4ECDC4',CYAN_DIM='#2A7A75',AMBER='#D4A843',GREEN='#4CAF7D',RED='#C0444A',TEXT='#7A9AB8';
+  const nodes=[
+    {id:0,label:'GOAL',sub:'kyc_update',x:.5,y:.12,r:25,color:CYAN,type:'goal'},
+    {id:1,label:'PLANNER',sub:'kernel',x:.5,y:.35,r:22,color:'#8A9BB0',type:'agent'},
+    {id:2,label:'RULE',sub:'AML-047',x:.18,y:.55,r:19,color:RED,type:'constraint'},
+    {id:3,label:'TASK',sub:'edd_gate',x:.5,y:.58,r:20,color:AMBER,type:'task'},
+    {id:4,label:'EVIDENCE',sub:'PRN-9183',x:.82,y:.55,r:19,color:CYAN_DIM,type:'evidence'},
+    {id:5,label:'AGENT',sub:'compliance',x:.25,y:.82,r:18,color:'#8A9BB0',type:'agent'},
+    {id:6,label:'TASK',sub:'review',x:.5,y:.84,r:18,color:AMBER,type:'task'},
+    {id:7,label:'STATE',sub:'complete',x:.75,y:.82,r:18,color:GREEN,type:'state'},
+    {id:8,label:'MEM',sub:'graph',x:.87,y:.33,r:17,color:CYAN_DIM,type:'mem'},
+    {id:9,label:'POLICY',sub:'fatf',x:.13,y:.33,r:17,color:RED,type:'rule'},
+  ];
+  const edges=[
+    {a:0,b:1,color:CYAN,label:'drives',flow:true},
+    {a:1,b:2,color:RED,label:'evaluates',flow:false},
+    {a:1,b:3,color:AMBER,label:'assigns',flow:true},
+    {a:1,b:4,color:CYAN_DIM,label:'retrieves',flow:false},
+    {a:2,b:3,color:RED,label:'blocks',flow:false},
+    {a:3,b:5,color:AMBER,label:'routes',flow:true},
+    {a:3,b:6,color:AMBER,label:'spawns',flow:true},
+    {a:6,b:7,color:GREEN,label:'resolves',flow:true},
+    {a:1,b:8,color:CYAN_DIM,label:'queries',flow:true},
+    {a:9,b:2,color:RED,label:'defines',flow:false},
+  ];
+  let pulses=[];
+  function spawnPulse(){
+    const fe=edges.filter(e=>e.flow);
+    const e=fe[Math.floor(Math.random()*fe.length)];
+    pulses.push({edge:e,progress:0,speed:.004+Math.random()*.003});
+  }
+  setInterval(spawnPulse,700);
+  function draw(){
+    const W=canvas.width,H=canvas.height;
+    ctx.clearRect(0,0,W,H);
+    function nx(n){return n.x*W/dpr*dpr}function ny(n){return n.y*H/dpr*dpr}
+    edges.forEach(e=>{
+      const a=nodes[e.a],b=nodes[e.b];
+      ctx.beginPath();ctx.moveTo(nx(a),ny(a));ctx.lineTo(nx(b),ny(b));
+      ctx.strokeStyle=e.color+'33';ctx.lineWidth=1;ctx.stroke();
+      const mx=(nx(a)+nx(b))/2,my=(ny(a)+ny(b))/2;
+      ctx.save();
+      // edge label pill background
+      ctx.font=`500 ${10*dpr}px JetBrains Mono,monospace`;
+      const lw=ctx.measureText(e.label).width;
+      const lh=13*dpr;const lpad=6*dpr;
+      ctx.fillStyle='rgba(8,12,15,0.82)';
+      ctx.beginPath();
+      const rx2=mx-lw/2-lpad,ry2=my-lh-2*dpr,rw2=lw+lpad*2,rh2=lh+2*dpr;
+      ctx.roundRect(rx2,ry2,rw2,rh2,3*dpr);
+      ctx.fill();
+      // edge label text — use edge colour at 90% opacity
+      ctx.fillStyle=e.color+'CC';
+      ctx.textAlign='center';ctx.textBaseline='bottom';
+      ctx.fillText(e.label,mx,my);
+      ctx.restore();
+    });
+    pulses=pulses.filter(p=>{
+      p.progress+=p.speed;if(p.progress>1)return false;
+      const a=nodes[p.edge.a],b=nodes[p.edge.b];
+      const px=(nx(a)+(nx(b)-nx(a))*p.progress),py=(ny(a)+(ny(b)-ny(a))*p.progress);
+      ctx.beginPath();ctx.arc(px,py,4*dpr,0,Math.PI*2);
+      ctx.fillStyle=p.edge.color;ctx.shadowBlur=12*dpr;ctx.shadowColor=p.edge.color;ctx.fill();ctx.shadowBlur=0;
+      return true;
+    });
+    nodes.forEach(n=>{
+      const x=nx(n),y=ny(n),r=n.r*dpr;
+      const grad=ctx.createRadialGradient(x,y,0,x,y,r*2.2);
+      grad.addColorStop(0,n.color+'18');grad.addColorStop(1,'transparent');
+      ctx.beginPath();ctx.arc(x,y,r*2.2,0,Math.PI*2);ctx.fillStyle=grad;ctx.fill();
+      ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle='#0D1117';ctx.fill();
+      ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.strokeStyle=n.color;ctx.lineWidth=1.2*dpr;ctx.stroke();
+      ctx.font=`700 ${Math.max(11,r*0.55)}px JetBrains Mono,monospace`;ctx.fillStyle=n.color;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(n.label,x,y-r*0.22);
+      ctx.font=`400 ${Math.max(9,r*0.44)}px JetBrains Mono,monospace`;ctx.fillStyle=TEXT;ctx.fillText(n.sub,x,y+r*0.40);
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// DAG OLD
+(function(){
+  const canvas=document.getElementById('dagOld');if(!canvas)return;
+  const dpr=window.devicePixelRatio||1;
+  const r=canvas.parentElement.getBoundingClientRect();
+  canvas.width=r.width*dpr;canvas.height=160*dpr;canvas.style.width=r.width+'px';canvas.style.height='160px';
+  const ctx=canvas.getContext('2d');
+  const nodes=[{x:.08,y:.5,l:'START'},{x:.28,y:.25,l:'Tool A'},{x:.28,y:.75,l:'Tool B'},{x:.52,y:.5,l:'Route'},{x:.72,y:.28,l:'Tool C'},{x:.72,y:.72,l:'Tool D'},{x:.92,y:.5,l:'END'}];
+  const edges=[[0,1],[0,2],[1,3],[2,3],[3,4],[3,5],[4,6],[5,6]];
+  const W=canvas.width,H=canvas.height;
+  function x(i){return nodes[i].x*W}function y(i){return nodes[i].y*H}
+  edges.forEach(([a,b])=>{ctx.beginPath();ctx.moveTo(x(a),y(a));ctx.lineTo(x(b),y(b));ctx.strokeStyle='#2E4055';ctx.lineWidth=1.5*dpr;ctx.stroke()});
+  nodes.forEach((n,i)=>{const px=n.x*W,py=n.y*H;ctx.beginPath();ctx.arc(px,py,16*dpr,0,Math.PI*2);ctx.fillStyle='#111820';ctx.fill();ctx.strokeStyle='#4A5E72';ctx.lineWidth=1.5*dpr;ctx.stroke();ctx.font=`600 ${13*dpr}px JetBrains Mono,monospace`;ctx.fillStyle='#A8BAD0';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(n.l,px,py)});
+})();
+
+// DAG NEW (animated)
+(function(){
+  const canvas=document.getElementById('dagNew');if(!canvas)return;
+  const dpr=window.devicePixelRatio||1;
+  const r=canvas.parentElement.getBoundingClientRect();
+  canvas.width=r.width*dpr;canvas.height=160*dpr;canvas.style.width=r.width+'px';canvas.style.height='160px';
+  const ctx=canvas.getContext('2d');
+  const CYAN='#4ECDC4';
+  const nodes=[{x:.5,y:.1,l:'GOAL',c:CYAN},{x:.5,y:.42,l:'PLANNER',c:'#8A9BB0'},{x:.18,y:.68,l:'CONSTRAINT',c:'#C0444A'},{x:.5,y:.72,l:'TASK',c:'#D4A843'},{x:.82,y:.68,l:'EVIDENCE',c:'#2A7A75'},{x:.5,y:.95,l:'OUTCOME',c:'#4CAF7D'}];
+  const edges=[[0,1,CYAN],[1,2,'#C0444A'],[1,3,'#D4A843'],[1,4,'#2A7A75'],[2,3,'#C0444A'],[3,5,'#4CAF7D'],[4,3,'#2A7A75']];
+  let pulses=[];
+  function spawn(){const e=edges[Math.floor(Math.random()*edges.length)];pulses.push({e,p:0,s:.025+Math.random()*.02})}
+  setInterval(spawn,350);
+  function draw(){
+    const W=canvas.width,H=canvas.height;ctx.clearRect(0,0,W,H);
+    function x(i){return nodes[i].x*W}function y(i){return nodes[i].y*H}
+    edges.forEach(([a,b,c])=>{ctx.beginPath();ctx.moveTo(x(a),y(a));ctx.lineTo(x(b),y(b));ctx.strokeStyle=c+'66';ctx.lineWidth=1.5*dpr;ctx.stroke()});
+    pulses=pulses.filter(p=>{p.p+=p.s;if(p.p>1)return false;const[a,b,c]=p.e;const px=(nodes[a].x+(nodes[b].x-nodes[a].x)*p.p)*W;const py=(nodes[a].y+(nodes[b].y-nodes[a].y)*p.p)*H;ctx.beginPath();ctx.arc(px,py,4*dpr,0,Math.PI*2);ctx.fillStyle=c;ctx.shadowBlur=8*dpr;ctx.shadowColor=c;ctx.fill();ctx.shadowBlur=0;return true});
+    nodes.forEach(n=>{const px=n.x*W,py=n.y*H;ctx.beginPath();ctx.arc(px,py,17*dpr,0,Math.PI*2);ctx.fillStyle='#0D1117';ctx.fill();ctx.strokeStyle=n.c;ctx.lineWidth=1.2*dpr;ctx.stroke();ctx.font=`700 ${13*dpr}px JetBrains Mono,monospace`;ctx.fillStyle=n.c;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(n.l,px,py)});
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+</script>
 </body>
 </html>
