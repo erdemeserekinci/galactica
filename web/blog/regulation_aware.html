@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Separating Probabilistic Intelligence from Deterministic Execution · Agentic AI Research</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --ink: #0f0e0c; --ink-muted: #4a4845; --ink-faint: #9a9690;
+    --surface: #f5f3ee; --surface-2: #ede9e2; --surface-3: #e2ddd4;
+    --accent: #1a3c8c; --accent-warm: #c8401a; --line: rgba(15,14,12,0.12);
+    --mono: 'DM Mono', monospace; --serif: 'DM Serif Display', serif; --sans: 'Syne', sans-serif;
+  }
+  html { scroll-behavior: smooth; }
+  body { background: var(--surface); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.75; -webkit-font-smoothing: antialiased; }
+
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: var(--accent); z-index: 9999; transition: width 0.1s linear; }
+
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.2rem 4vw; background: rgba(245,243,238,0.88); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav-logo { font-family: var(--mono); font-size: 0.75rem; font-weight: 500; color: var(--ink-muted); letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none; }
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a { font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-muted); text-decoration: none; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--accent); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr;
+    align-items: end; padding: 8rem 4vw 5rem;
+    border-bottom: 1px solid var(--line); position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 59px, var(--line) 60px);
+    pointer-events: none;
+  }
+  .hero-text { position: relative; }
+  .hero-eyebrow { display: inline-flex; align-items: center; gap: 0.5rem; font-family: var(--mono); font-size: 0.72rem; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-bottom: 2rem; }
+  .hero-eyebrow span { display: inline-block; width: 24px; height: 1px; background: var(--accent); }
+  h1.hero-title { font-family: var(--serif); font-size: clamp(2.8rem, 5.5vw, 5.5rem); line-height: 1.06; color: var(--ink); margin-bottom: 2.5rem; max-width: 16ch; }
+  h1.hero-title em { font-style: italic; color: var(--accent); }
+  .hero-meta { display: flex; gap: 2.5rem; }
+  .hero-meta-item { display: flex; flex-direction: column; gap: 0.25rem; }
+  .hero-meta-label { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); }
+  .hero-meta-value { font-size: 0.9rem; font-weight: 600; color: var(--ink); }
+  .hero-right { position: relative; display: flex; flex-direction: column; align-items: flex-end; justify-content: flex-end; padding-left: 4rem; }
+  .hero-subtitle { font-size: 1.05rem; color: var(--ink-muted); line-height: 1.7; max-width: 38ch; text-align: right; margin-bottom: 2rem; }
+  .hero-big-number { font-family: var(--serif); font-size: clamp(5rem, 14vw, 14rem); line-height: 0.85; color: var(--surface-3); position: absolute; right: -2vw; bottom: -2rem; z-index: -1; user-select: none; pointer-events: none; }
+
+  /* INTRO BAND */
+  .intro-band { background: var(--ink); color: var(--surface); padding: 5rem 4vw; display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
+  .intro-band p { font-size: 1.05rem; line-height: 1.8; color: rgba(245,243,238,0.75); }
+  .intro-band p + p { margin-top: 1.25rem; }
+  .intro-pull { font-family: var(--serif); font-size: clamp(1.8rem, 3vw, 2.5rem); line-height: 1.25; color: var(--surface); border-left: 3px solid #1a3c8c; padding-left: 2rem; }
+
+  /* ARCH COMPARISON */
+  .arch-compare {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+    background: var(--line); border: 1px solid var(--line);
+    border-radius: 8px; overflow: hidden; margin: 2rem 0;
+  }
+  .arch-col { padding: 1.75rem; background: var(--surface); }
+  .arch-col.alt { background: var(--surface-2); }
+  .arch-col-label { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 1rem; }
+  .arch-col-title { font-family: var(--serif); font-size: 1.05rem; color: var(--ink); margin-bottom: 1rem; line-height: 1.3; }
+  .arch-flow { font-family: var(--mono); font-size: 0.82rem; color: var(--ink-muted); line-height: 2.2; }
+  .arch-flow span { display: inline-block; }
+  .arch-arrow { color: var(--ink-faint); margin: 0 0.25rem; }
+  .arch-col.alt .arch-flow { color: var(--accent); }
+
+  /* SECTION LAYOUT */
+  .section { padding: 6rem 4vw; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: 200px 1fr; gap: 4rem; align-items: start; }
+  .section.alt-bg { background: var(--surface-2); }
+  .section-aside { position: sticky; top: 7rem; }
+  .section-number { font-family: var(--serif); font-size: 5rem; line-height: 1; color: var(--surface-3); display: block; margin-bottom: 0.5rem; }
+  .section-tag { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); }
+  h2.section-title { font-family: var(--serif); font-size: clamp(2rem, 3.5vw, 3rem); line-height: 1.15; color: var(--ink); margin-bottom: 1.75rem; }
+  .section-body p { color: var(--ink-muted); margin-bottom: 1.25rem; font-size: 1.02rem; }
+
+  /* PHOTO BLOCK */
+  .photo-block { margin: 2.5rem 0; border-radius: 10px; overflow: hidden; position: relative; background: var(--surface-3); }
+  .photo-block img { width: 100%; height: 280px; object-fit: cover; display: block; filter: grayscale(20%) contrast(1.05); transition: transform 0.6s ease, filter 0.4s ease; }
+  .photo-block:hover img { transform: scale(1.03); filter: grayscale(0%) contrast(1.05); }
+  .photo-caption { position: absolute; bottom: 0; left: 0; right: 0; padding: 0.75rem 1rem; background: linear-gradient(transparent, rgba(15,14,12,0.55)); font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.7); }
+
+  .diagram-block { margin: 2.5rem 0; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); background: #fff; }
+  .diagram-block img { width: 100%; height: auto; display: block; }
+  .diagram-caption { padding: 0.85rem 1.25rem; font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); border-top: 1px solid var(--line); background: var(--surface-2); line-height: 1.6; }
+
+  /* MAGAZINE PULLOUT FIGURE */
+  .mag-figure {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    margin: 3rem -2rem;
+    border-top: 2px solid var(--ink);
+    border-bottom: 2px solid var(--ink);
+    background: var(--surface-2);
+  }
+  .mag-figure-img {
+    overflow: hidden;
+    border-right: 1px solid var(--line);
+  }
+  .mag-figure-img img {
+    width: 100%; height: 100%;
+    object-fit: contain;
+    display: block;
+    background: #fff;
+  }
+  .mag-figure-caption {
+    padding: 2.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1.25rem;
+  }
+  .mag-figure-label {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .mag-figure-label::before {
+    content: '';
+    display: inline-block;
+    width: 20px; height: 1px;
+    background: var(--accent);
+  }
+  .mag-figure-text {
+    font-family: var(--serif);
+    font-size: 1.0rem;
+    line-height: 1.7;
+    color: var(--ink-muted);
+  }
+  .mag-figure-text em { color: var(--ink); font-style: italic; }
+  .mag-figure-ref {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    color: var(--ink-faint);
+    border-top: 1px solid var(--line);
+    padding-top: 1rem;
+    line-height: 1.6;
+  }
+  @media (max-width: 900px) {
+    .mag-figure { grid-template-columns: 1fr; margin: 2rem 0; }
+    .mag-figure-img { border-right: none; border-bottom: 1px solid var(--line); max-height: 340px; }
+  }
+
+  /* CALLOUT */
+  .callout { background: var(--surface-3); border-left: 3px solid var(--accent); padding: 1.5rem 1.75rem; margin: 2rem 0; border-radius: 0 6px 6px 0; }
+  .callout p { font-family: var(--serif); font-size: 1.25rem; line-height: 1.5; color: var(--ink) !important; margin: 0 !important; }
+  .callout.warm { border-left-color: var(--accent-warm); }
+
+  /* NOT-EQUAL CONTRAST PAIR */
+  .contrast-pair { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 1rem; margin: 2rem 0; background: var(--surface-3); padding: 1.5rem; border-radius: 8px; }
+  .contrast-item { padding: 1rem 1.25rem; background: var(--surface); border-radius: 6px; }
+  .contrast-item.accent-side { border-left: 3px solid var(--accent); }
+  .contrast-label { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 0.5rem; }
+  .contrast-text { font-family: var(--serif); font-size: 1.05rem; line-height: 1.35; color: var(--ink); }
+  .neq-divider { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .neq-icon { position: relative; width: 28px; height: 32px; display: flex; align-items: center; justify-content: center; }
+  .neq-label { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); margin-top: 4px; }
+
+  /* POLICY KEY SHIFT */
+  .key-shift {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+    border: 1px solid var(--line); border-radius: 8px; overflow: hidden; margin: 2.5rem 0;
+  }
+  .shift-before { background: rgba(200,64,26,0.06); padding: 1.75rem 2rem; border-right: 1px solid var(--line); }
+  .shift-after { background: rgba(26,60,140,0.06); padding: 1.75rem 2rem; }
+  .shift-label { font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 0.75rem; }
+  .shift-text { font-family: var(--serif); font-size: 1.1rem; line-height: 1.4; color: var(--ink); }
+  .shift-before .shift-text { color: var(--accent-warm); }
+  .shift-after .shift-text { color: var(--accent); }
+
+  /* PIPELINE STEPS */
+  .pipeline-steps { display: flex; flex-direction: column; gap: 0; margin: 2rem 0; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .pipeline-step { display: flex; align-items: flex-start; gap: 1.25rem; padding: 1.25rem 1.5rem; background: var(--surface); border-bottom: 1px solid var(--line); }
+  .pipeline-step:last-child { border-bottom: none; }
+  .pipeline-step:nth-child(even) { background: var(--surface-2); }
+  .step-num { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.12em; color: var(--accent); min-width: 3ch; margin-top: 0.15rem; }
+  .step-content {}
+  .step-title { font-weight: 700; font-size: 0.9rem; color: var(--ink); margin-bottom: 0.2rem; }
+  .step-desc { font-size: 0.85rem; color: var(--ink-muted); line-height: 1.6; }
+
+  /* ACTION TYPES */
+  .action-types { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; margin: 2rem 0; }
+  .action-type { padding: 1.1rem 1rem; background: var(--surface); text-align: center; }
+  .action-type .a-icon { font-size: 1.25rem; margin-bottom: 0.4rem; }
+  .action-type .a-label { font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-muted); }
+  .action-type.feasible { background: rgba(26,60,140,0.06); }
+  .action-type.forbidden { background: rgba(200,64,26,0.06); }
+  .action-type.escalated { background: rgba(180,140,20,0.06); }
+
+  /* CONCLUSION */
+  .conclusion { background: var(--ink); color: var(--surface); padding: 8rem 4vw; text-align: center; position: relative; overflow: hidden; }
+  .conclusion::before { content: 'TRUST'; position: absolute; font-family: var(--serif); font-size: 22vw; color: rgba(255,255,255,0.03); top: 50%; left: 50%; transform: translate(-50%, -50%); white-space: nowrap; pointer-events: none; user-select: none; }
+  .conclusion-inner { position: relative; max-width: 780px; margin: auto; }
+  .conclusion h2 { font-family: var(--serif); font-size: clamp(2.5rem, 5vw, 4.5rem); line-height: 1.1; margin-bottom: 1.5rem; }
+  .conclusion-lead { font-size: 1.1rem; color: rgba(245,243,238,0.5); line-height: 1.8; margin-bottom: 1rem; }
+  .conclusion-statement { font-family: var(--serif); font-size: clamp(1.3rem, 2.5vw, 1.75rem); color: rgba(245,243,238,0.92); line-height: 1.45; margin: 2.5rem 0; border-left: 3px solid #1a3c8c; padding-left: 1.5rem; text-align: left; }
+  .conclusion-divider { width: 40px; height: 2px; background: rgba(245,243,238,0.15); margin: 2.5rem auto; }
+  .bottleneck-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: rgba(245,243,238,0.08); border: 1px solid rgba(245,243,238,0.08); border-radius: 10px; overflow: hidden; margin: 2.5rem 0; text-align: left; }
+  .bottleneck-item { padding: 1.5rem 1.75rem; background: rgba(245,243,238,0.03); transition: background 0.25s; }
+  .bottleneck-item:hover { background: rgba(245,243,238,0.07); }
+  .bottleneck-num { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.16em; text-transform: uppercase; color: #4a7cdc; margin-bottom: 0.6rem; }
+  .bottleneck-title { font-family: var(--serif); font-size: 1.2rem; color: rgba(245,243,238,0.92); margin-bottom: 0.4rem; line-height: 1.2; }
+  .bottleneck-desc { font-size: 0.88rem; color: rgba(245,243,238,0.45); line-height: 1.65; }
+  .conclusion-final { font-family: var(--mono); font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(245,243,238,0.3); margin-top: 3rem; text-align: center; }
+  .conclusion-final strong { color: rgba(245,243,238,0.75); letter-spacing: 0.14em; }
+  @media (max-width: 600px) { .bottleneck-grid { grid-template-columns: 1fr; } .action-types { grid-template-columns: 1fr 1fr; } }
+
+  /* TOC */
+  .toc-sidebar { position: fixed; left: 2vw; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 0.75rem; z-index: 50; }
+  .toc-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--surface-3); cursor: pointer; transition: background 0.3s, transform 0.3s; border: 1px solid var(--line); position: relative; }
+  .toc-dot.active { background: var(--accent); transform: scale(1.4); border-color: var(--accent); }
+  .toc-dot:hover::after { content: attr(data-label); position: absolute; left: 16px; top: 50%; transform: translateY(-50%); background: var(--ink); color: var(--surface); font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.3rem 0.6rem; border-radius: 4px; white-space: nowrap; pointer-events: none; }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; min-height: auto; padding-top: 10rem; }
+    .hero-right { align-items: flex-start; padding-left: 0; margin-top: 3rem; }
+    .hero-subtitle { text-align: left; }
+    .intro-band { grid-template-columns: 1fr; }
+    .section { grid-template-columns: 1fr; gap: 1.5rem; }
+    .section-aside { position: static; }
+    .toc-sidebar { display: none; }
+    .contrast-pair { grid-template-columns: 1fr; }
+    .arch-compare { grid-template-columns: 1fr; }
+    .key-shift { grid-template-columns: 1fr; }
+  }
+
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* REFERENCES SECTION */
+  .references-section {
+    padding: 5rem 4vw;
+    border-top: 1px solid var(--line);
+    background: var(--surface-2);
+  }
+  .references-inner { max-width: 860px; margin: auto; display: grid; grid-template-columns: 200px 1fr; gap: 4rem; }
+  .references-aside {}
+  .references-aside-label {
+    font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--ink-faint); display: block; margin-bottom: 0.5rem;
+  }
+  .references-aside-title {
+    font-family: var(--serif); font-size: 2rem; line-height: 1.1; color: var(--surface-3);
+  }
+  .references-list { display: flex; flex-direction: column; gap: 0; }
+  .ref-item {
+    display: grid; grid-template-columns: 2.5rem 1fr;
+    gap: 0.75rem; padding: 1rem 0;
+    border-bottom: 1px solid var(--line);
+    align-items: baseline;
+  }
+  .ref-num {
+    font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.1em;
+    color: var(--accent); text-align: right; padding-top: 0.1rem;
+  }
+  .ref-text { font-size: 0.88rem; color: var(--ink-muted); line-height: 1.65; }
+  .ref-text strong { color: var(--ink); font-weight: 600; }
+  .ref-text em { font-style: italic; }
+  @media (max-width: 900px) {
+    .references-inner { grid-template-columns: 1fr; gap: 2rem; }
+  }
+
+  /* INLINE REFERENCE SUPERSCRIPT */
+  .ref-sup {
+    font-family: var(--mono); font-size: 0.6rem; color: var(--accent);
+    vertical-align: super; line-height: 0; margin-left: 1px;
+    text-decoration: none; border-bottom: none;
+  }
+  .ref-sup:hover { text-decoration: underline; } padding: 2.5rem 4vw; border-top: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; }
+  footer p { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); }
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<nav>
+  <a class="nav-logo" href="../index.html">← Agentic AI Research</a>
+  <ul class="nav-links">
+    <li><a href="#context">Context</a></li>
+    <li><a href="#policies">Policies</a></li>
+    <li><a href="#pipeline">Pipeline</a></li>
+    <li><a href="#final">Conclusion</a></li>
+  </ul>
+</nav>
+
+<div class="toc-sidebar" id="toc">
+  <div class="toc-dot active" data-label="Hero" data-target="hero"></div>
+  <div class="toc-dot" data-label="Context Is Not Memory" data-target="context"></div>
+  <div class="toc-dot" data-label="Policies as Documents" data-target="policies"></div>
+  <div class="toc-dot" data-label="Decision Pipelines" data-target="pipeline"></div>
+  <div class="toc-dot" data-label="Trustworthy Systems" data-target="trustworthy"></div>
+  <div class="toc-dot" data-label="Conclusion" data-target="final"></div>
+</div>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <div class="hero-text">
+    <div class="hero-eyebrow"><span></span>Essay 02 · Decision Infrastructure</div>
+    <h1 class="hero-title">Separating <em>Probabilistic Intelligence</em> from Deterministic Execution</h1>
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <span class="hero-meta-label">Topic</span>
+        <span class="hero-meta-value">Policy-Constrained AI</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-label">Sections</span>
+        <span class="hero-meta-value">4 Sections</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-label">Domain</span>
+        <span class="hero-meta-value">Regulated Enterprise</span>
+      </div>
+    </div>
+  </div>
+  <div class="hero-right">
+    <p class="hero-subtitle">Most current agent architectures optimize action generation, not decision validity. In regulated environments, this distinction is consequential.</p>
+    <div class="hero-big-number">4</div>
+  </div>
+</section>
+
+<!-- INTRO BAND -->
+<section class="intro-band">
+  <div class="reveal">
+    <p>Modern frameworks such as LangGraph, AutoGen, and the Model Context Protocol (MCP) are rapidly expanding the operational capabilities of AI systems. Tool calling, workflow execution, multi-agent coordination, memory handling — the ecosystem is maturing fast.</p>
+    <p>Yet as these systems move beyond demos into regulated enterprise environments, a structural limitation becomes increasingly visible: most current agent architectures optimize action <em>generation</em>, not decision <em>validity</em>.</p>
+    <p>The problem is not simply intelligence. It is architectural.</p>
+    <p style="margin-top:1.25rem;">Existing systems are highly effective at producing plausible actions, but they still lack native mechanisms for: deterministic decision execution, runtime policy enforcement, constraint-aware planning, contextual graph state management, and auditable operational reasoning.</p>
+  </div>
+  <blockquote class="intro-pull reveal">
+    Existing systems are highly effective at producing plausible actions — but they still lack native mechanisms for deterministic decision execution.
+  </blockquote>
+</section>
+
+
+<!-- SECTION 1: Context Is Not Memory -->
+<section class="section" id="context">
+  <div class="section-aside">
+    <span class="section-number">01</span>
+    <span class="section-tag">Context Is Not Memory</span>
+  </div>
+  <div class="section-body">
+    <h2 class="section-title reveal">Operational State vs. Retrieved Information</h2>
+
+    <div class="photo-block reveal">
+      <img
+        src="https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=900&auto=format&fit=crop&q=75"
+        alt="Power grid infrastructure at dusk — reliable, structured, deterministic"
+        loading="lazy"
+      >
+      <div class="photo-caption">Operational state — structured, persistent, always current</div>
+    </div>
+
+    <p class="reveal">Most current agent systems treat context primarily as conversation history, retrieved documents, or vector similarity results. This approach works reasonably well for conversational tasks. Operational systems require a fundamentally different type of context management.</p>
+    <p class="reveal">In real environments, decisions depend not only on retrieved information, but also on entity relationships, organizational structure, temporal events, ownership chains, previous decisions, active constraints, and continuously evolving operational state.<a href="#ref-1" class="ref-sup">[1]</a></p>
+
+    <div class="callout reveal">
+      <p>A customer is not just a document. A company is not just a text chunk. A regulatory event is not simply another retrieval result.</p>
+    </div>
+
+    <div class="contrast-pair reveal">
+      <div class="contrast-item">
+        <div class="contrast-label">What Memory Does</div>
+        <div class="contrast-text">Stores information</div>
+      </div>
+      <div class="neq-divider">
+        <div class="neq-icon">
+          <svg width="28" height="34" viewBox="0 0 28 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <line x1="4" y1="12" x2="24" y2="12" stroke="#9a9690" stroke-width="2" stroke-linecap="round"/>
+            <line x1="4" y1="22" x2="24" y2="22" stroke="#9a9690" stroke-width="2" stroke-linecap="round"/>
+            <line x1="20" y1="5" x2="8" y2="29" stroke="#1a3c8c" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <span class="neq-label">not equal</span>
+      </div>
+      <div class="contrast-item accent-side">
+        <div class="contrast-label">What Operational Context Does</div>
+        <div class="contrast-text">Maintains system state</div>
+      </div>
+    </div>
+
+    <p class="reveal">In practice, the system must continuously maintain and update structures such as entities, relationships, temporal event chains, policy bindings, and execution history. This is one of the reasons why graph-based approaches are becoming increasingly important in agent systems.</p>
+
+    <p style="font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 1rem;" class="reveal">The Architectural Gap</p>
+    <div class="reveal" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; margin-bottom: 2.5rem;">
+      <!-- LEFT: Probabilistic loop -->
+      <div style="background: var(--surface); padding: 2rem;">
+        <div style="font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 0.4rem;">Most agent stacks today</div>
+        <div style="font-family: var(--sans); font-size: 0.9rem; font-weight: 600; color: var(--ink); margin-bottom: 1.5rem;">Probabilistic execution loop</div>
+        <div style="display: flex; gap: 0;">
+          <div style="flex: 1; display: flex; flex-direction: column; gap: 0;">
+            <div style="padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.82rem; color: var(--ink-muted); background: var(--surface-2);">Prompt</div>
+            <div style="display:flex;justify-content:center;height:22px;align-items:center;"><svg width="12" height="16" viewBox="0 0 12 16"><line x1="6" y1="0" x2="6" y2="11" stroke="#9a9690" stroke-width="1"/><path d="M3 8L6 12L9 8" fill="none" stroke="#9a9690" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div style="padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.82rem; color: var(--ink-muted); background: var(--surface-2);">Reasoning</div>
+            <div style="display:flex;justify-content:center;height:22px;align-items:center;"><svg width="12" height="16" viewBox="0 0 12 16"><line x1="6" y1="0" x2="6" y2="11" stroke="#9a9690" stroke-width="1"/><path d="M3 8L6 12L9 8" fill="none" stroke="#9a9690" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div style="padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.82rem; color: var(--ink-muted); background: var(--surface-2);">Tool call</div>
+            <div style="display:flex;justify-content:center;height:22px;align-items:center;"><svg width="12" height="16" viewBox="0 0 12 16"><line x1="6" y1="0" x2="6" y2="11" stroke="#9a9690" stroke-width="1"/><path d="M3 8L6 12L9 8" fill="none" stroke="#9a9690" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div style="padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.82rem; color: var(--ink-muted); background: var(--surface-2);">Response</div>
+          </div>
+          <div style="width: 32px; display: flex; flex-direction: column; align-items: center; padding-top: 10px; padding-bottom: 10px;">
+            <div style="width: 14px; height: 14px; border-top: 1.5px solid var(--line); border-right: 1.5px solid var(--line); border-radius: 0 4px 0 0; align-self: flex-end;"></div>
+            <div style="width: 1.5px; flex: 1; background: var(--line); align-self: flex-end;"></div>
+            <div style="width: 14px; height: 14px; border-bottom: 1.5px solid var(--line); border-right: 1.5px solid var(--line); border-radius: 0 0 4px 0; align-self: flex-end;"></div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;margin-top:4px;">
+          <span style="font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint);">new request ↩</span>
+        </div>
+      </div>
+      <!-- RIGHT: Constrained decision structure -->
+      <div style="background: var(--surface-2); padding: 2rem;">
+        <div style="font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 0.4rem;">What operational systems require</div>
+        <div style="font-family: var(--sans); font-size: 0.9rem; font-weight: 600; color: var(--ink); margin-bottom: 1.5rem;">Constrained decision structure</div>
+        <div style="display: flex; gap: 0;">
+          <div style="flex: 1; display: flex; flex-direction: column; gap: 0;">
+            <div style="padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.82rem; color: #0F6E56; font-weight: 600; background: rgba(29,158,117,0.08);">Event</div>
+            <div style="display:flex;justify-content:center;height:22px;align-items:center;"><svg width="12" height="16" viewBox="0 0 12 16"><line x1="6" y1="0" x2="6" y2="11" stroke="#9a9690" stroke-width="1"/><path d="M3 8L6 12L9 8" fill="none" stroke="#9a9690" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div style="padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.82rem; color: var(--ink-muted); background: var(--surface);">Contextual state</div>
+            <div style="display:flex;justify-content:center;height:22px;align-items:center;"><svg width="12" height="16" viewBox="0 0 12 16"><line x1="6" y1="0" x2="6" y2="11" stroke="#9a9690" stroke-width="1"/><path d="M3 8L6 12L9 8" fill="none" stroke="#9a9690" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div style="padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.82rem; color: #534AB7; font-weight: 600; background: rgba(127,119,221,0.1);">Policy evaluation</div>
+            <div style="display:flex;justify-content:center;height:22px;align-items:center;"><svg width="12" height="16" viewBox="0 0 12 16"><line x1="6" y1="0" x2="6" y2="11" stroke="#9a9690" stroke-width="1"/><path d="M3 8L6 12L9 8" fill="none" stroke="#9a9690" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div style="padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.82rem; color: var(--ink-muted); background: var(--surface);">Constrained planning</div>
+            <div style="display:flex;justify-content:center;height:22px;align-items:center;"><svg width="12" height="16" viewBox="0 0 12 16"><line x1="6" y1="0" x2="6" y2="11" stroke="#9a9690" stroke-width="1"/><path d="M3 8L6 12L9 8" fill="none" stroke="#9a9690" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div style="padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.82rem; color: #0F6E56; font-weight: 600; background: rgba(29,158,117,0.08);">Execution</div>
+          </div>
+          <div style="width: 32px; display: flex; flex-direction: column; align-items: center; padding-top: 10px; padding-bottom: 10px;">
+            <div style="width: 14px; height: 14px; border-top: 1.5px solid #1D9E75; border-right: 1.5px solid #1D9E75; border-radius: 0 4px 0 0; align-self: flex-end;"></div>
+            <div style="width: 1.5px; flex: 1; background: #1D9E75; align-self: flex-end;"></div>
+            <div style="width: 14px; height: 14px; border-bottom: 1.5px solid #1D9E75; border-right: 1.5px solid #1D9E75; border-radius: 0 0 4px 0; align-self: flex-end;"></div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;margin-top:4px;">
+          <span style="font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: #1D9E75;">new event ↩</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="mag-figure reveal">
+      <div class="mag-figure-img">
+        <img src="dispute-graph.png" alt="Dispute resolution task graph — LLM at centre connected to operational context nodes" loading="lazy">
+      </div>
+      <div class="mag-figure-caption">
+        <div class="mag-figure-label">Example · Dispute Resolution</div>
+        <p class="mag-figure-text">
+          Consider a dispute resolution task handled by an LLM-driven agent system.<a href="#ref-2" class="ref-sup">[2]</a> The LLM does not operate on isolated prompts alone. Instead, it continuously interacts with a <em>graph-structured operational context</em> surrounding the task.
+          <br><br>
+          Entities such as the customer profile, disputed transaction, merchant information, fraud signals, policy rules, account state, evidence documents, and dispute timeline are all represented as connected nodes. The relationships between these nodes encode contextual dependencies, ownership relations, policy bindings, temporal event chains, and operational constraints.
+          <br><br>
+          During execution, the LLM navigates this graph to retrieve not only information, but also the <em>evolving state of the dispute itself.</em> In this sense, the graph becomes more than a retrieval layer — it acts as the runtime memory, operational state representation, and execution context of the entire decision system.<a href="#ref-3" class="ref-sup">[3]</a>
+        </p>
+        <div class="mag-figure-ref">Fig. 1 — Graph-Structured Operational Context &nbsp;·&nbsp; [2][3]</div>
+      </div>
+    </div>
+
+    <p class="reveal">A graph is not only useful for retrieval. It provides a <em>runtime representation of operational state</em> — reasoning over connected entities, evolving relationships, temporal dependencies, and contextual propagation paths. The graph stops being a storage layer and becomes contextual memory, operational state representation, and execution context for decision systems.<a href="#ref-4" class="ref-sup">[4]</a></p>
+  </div>
+</section>
+
+<!-- SECTION 2: Policies Cannot Stay as Documents -->
+<section class="section alt-bg" id="policies">
+  <div class="section-aside">
+    <span class="section-number">02</span>
+    <span class="section-tag">Policies as Executable Constraints</span>
+  </div>
+  <div class="section-body">
+    <h2 class="section-title reveal">Policies Cannot Stay as Documents</h2>
+
+    <div class="photo-block reveal">
+      <img
+        src="https://images.unsplash.com/photo-1544383835-bda2bc66a55d?w=900&auto=format&fit=crop&q=75"
+        alt="Railway track switch — a physical constraint that determines the path"
+        loading="lazy"
+      >
+      <div class="photo-caption">Constraints that shape the path — not rules that are read after the fact</div>
+    </div>
+
+    <p class="reveal">Imagine a dispute agent handling a chargeback request. The customer claims a transaction was fraudulent. The transaction was made from a trusted device. The merchant has a low risk score. On the surface, the case looks simple.</p>
+    <p class="reveal">But the transaction occurred shortly after an unusual password reset, the customer had a recent device change, and the bank's fraud policy requires escalation when multiple weak signals appear together within a short time window.</p>
+
+    <div class="callout warm reveal">
+      <p>At this point, the policy cannot remain a PDF. It must become part of the reasoning substrate.</p>
+    </div>
+
+    <p class="reveal">In an operational agent system, policies should not be retrieved only as text after the LLM has already formed an answer. They must actively constrain execution: blocking certain actions, triggering escalations, changing approval paths, requiring additional evidence, or preventing automated resolution.<a href="#ref-6" class="ref-sup">[6]</a></p>
+    <p class="reveal">A Datalog-like rule can express that a dispute must be escalated if a disputed transaction follows a password reset, involves a new device, and exceeds a risk threshold.<a href="#ref-8" class="ref-sup">[8]</a><a href="#ref-9" class="ref-sup">[9]</a> The LLM may interpret the case and explain the decision — but the policy condition itself is evaluated <em>deterministically</em> over the graph.</p>
+
+    <div class="key-shift reveal">
+      <div class="shift-before">
+        <div class="shift-label">Old model</div>
+        <div class="shift-text">Policies are documents that agents read.</div>
+      </div>
+      <div class="shift-after">
+        <div class="shift-label">Required model</div>
+        <div class="shift-text">Policies must become executable structures that agents must obey.</div>
+      </div>
+    </div>
+
+    <p class="reveal">This separation between probabilistic reasoning and constrained execution echoes earlier BDI-based agent models, where intelligent behavior emerges not only from goals, but also from continuously maintained beliefs, intentions, obligations, and execution constraints.<a href="#ref-7" class="ref-sup">[7]</a></p>
+  </div>
+</section>
+
+<!-- SECTION 3: Constraint-Aware Decision Pipelines -->
+<section class="section" id="pipeline">
+  <div class="section-aside">
+    <span class="section-number">03</span>
+    <span class="section-tag">Constraint-Aware Pipelines</span>
+  </div>
+  <div class="section-body">
+    <h2 class="section-title reveal">Runtime Decision Control</h2>
+
+    <p class="reveal">Once context becomes a continuously evolving operational state and policies become executable constraints, the next challenge is decision execution itself. The problem is no longer retrieval. It becomes runtime decision control.</p>
+    <p class="reveal">Operational environments rarely contain a single valid action. Instead, they contain a spectrum of action types that must be continuously filtered and validated under runtime constraints:</p>
+
+    <div class="action-types reveal">
+      <div class="action-type feasible">
+        <div class="a-icon">✓</div>
+        <div class="a-label">Feasible</div>
+      </div>
+      <div class="action-type forbidden">
+        <div class="a-icon">✗</div>
+        <div class="a-label">Forbidden</div>
+      </div>
+      <div class="action-type escalated">
+        <div class="a-icon">↑</div>
+        <div class="a-label">Escalated</div>
+      </div>
+      <div class="action-type">
+        <div class="a-icon">⏱</div>
+        <div class="a-label">Delayed</div>
+      </div>
+      <div class="action-type feasible">
+        <div class="a-icon">≈</div>
+        <div class="a-label">Conditional</div>
+      </div>
+    </div>
+
+    <p class="reveal">Instead of directly executing generated actions, the system must evaluate feasibility, prune invalid paths, apply runtime constraints, detect conflicts, and generate alternative execution paths when necessary. A simplified constrained decision pipeline looks like this:</p>
+
+    <div class="pipeline-steps reveal">
+      <div class="pipeline-step">
+        <span class="step-num">01</span>
+        <div class="step-content">
+          <div class="step-title">Incoming Event</div>
+          <div class="step-desc">New event arrives from internal or external sources — APIs, systems, users, streams.</div>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">02</span>
+        <div class="step-content">
+          <div class="step-title">Entity Resolution</div>
+          <div class="step-desc">Identify and link entities, map to canonical references, deduplicate, assign provenance.</div>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">03</span>
+        <div class="step-content">
+          <div class="step-title">Graph Update</div>
+          <div class="step-desc">Update the operational knowledge graph with new entities, relationships, events, and temporal edges.</div>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">04</span>
+        <div class="step-content">
+          <div class="step-title">Contextual State Retrieval</div>
+          <div class="step-desc">Retrieve the current contextual state — neighborhoods, historical context, active policies, prior decisions.</div>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">05</span>
+        <div class="step-content">
+          <div class="step-title">Risk Evaluation</div>
+          <div class="step-desc">Evaluate risks and impacts based on history — risk scoring, impact analysis, anomaly detection, trend identification.</div>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">06</span>
+        <div class="step-content">
+          <div class="step-title">Constraint Filtering</div>
+          <div class="step-desc">Apply active policies and constraints to filter infeasible options early — policy rules, authority limits, business rules.</div>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">07</span>
+        <div class="step-content">
+          <div class="step-title">Candidate Action Generation</div>
+          <div class="step-desc">Generate possible actions using LLMs and planning heuristics — tool capabilities, option expansion.</div>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">08</span>
+        <div class="step-content">
+          <div class="step-title">Constrained Action Selection</div>
+          <div class="step-desc">Select the best action under constraints — feasibility check, scoring, conflict resolution, best action choice.</div>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">09</span>
+        <div class="step-content">
+          <div class="step-title">Execution & Audit</div>
+          <div class="step-desc">Execute the selected action, trigger workflow, commit state, log to audit trail.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="contrast-pair reveal">
+      <div class="contrast-item">
+        <div class="contrast-label">Traditional AI Architecture</div>
+        <div class="contrast-text">Generate → Execute</div>
+      </div>
+      <div class="neq-divider">
+        <div class="neq-icon">
+          <svg width="28" height="34" viewBox="0 0 28 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <line x1="4" y1="12" x2="24" y2="12" stroke="#9a9690" stroke-width="2" stroke-linecap="round"/>
+            <line x1="4" y1="22" x2="24" y2="22" stroke="#9a9690" stroke-width="2" stroke-linecap="round"/>
+            <line x1="20" y1="5" x2="8" y2="29" stroke="#1a3c8c" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <span class="neq-label">not equal</span>
+      </div>
+      <div class="contrast-item accent-side">
+        <div class="contrast-label">Constrained Decision Pipeline</div>
+        <div class="contrast-text">Generate → Filter → Validate → Execute</div>
+      </div>
+    </div>
+
+    <p class="reveal">Conceptually, this brings modern agent systems closer to classical planning systems — GraphPlan, constraint satisfaction, heuristic search, A* variants, and dynamic replanning algorithms — than to traditional conversational AI architectures. However, unlike classical planners, modern operational systems also contain probabilistic semantic interpretation, unstructured inputs, evolving graph context, and dynamically changing policies.</p>
+
+    <div class="diagram-block reveal">
+      <img
+        src="pipeline-diagram.png"
+        alt="From Operational Graph to Executable Rules to Controlled Execution — full architecture diagram"
+        loading="lazy"
+      >
+      <div class="diagram-caption">From Operational Graph to Executable Rules to Controlled Execution — policies are not documents. They are executable constraints over operational state.</div>
+    </div>
+
+    <div class="callout reveal">
+      <p>The emerging architecture is neither purely symbolic nor purely probabilistic. It is a hybrid execution model — where LLMs interpret, graphs maintain state, constraints define boundaries, and planners generate feasible actions within those boundaries.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 4: Toward Trustworthy Autonomous Systems -->
+<section class="section alt-bg" id="trustworthy">
+  <div class="section-aside">
+    <span class="section-number">04</span>
+    <span class="section-tag">Trustworthy Autonomous Systems</span>
+  </div>
+  <div class="section-body">
+    <h2 class="section-title reveal">Beyond Orchestration</h2>
+
+    <div class="photo-block reveal">
+      <img
+        src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=900&auto=format&fit=crop&q=75"
+        alt="Earth seen from space with network of light connections — global coordination"
+        loading="lazy"
+      >
+      <div class="photo-caption">Sustained coordination — the next frontier of autonomous systems</div>
+    </div>
+
+    <p class="reveal">Once operational context, executable constraints, and constrained planning become part of the runtime itself, autonomous execution stops being a simple orchestration problem. The system continuously operates on a changing operational state: entities evolve, relationships change, constraints activate or expire, and execution feasibility shifts over time.</p>
+    <p class="reveal">Under these conditions, execution can no longer depend solely on generated outputs. The system must continuously reevaluate context, validate constraints, adapt plans, and maintain operational consistency across changing conditions.</p>
+
+    <div class="callout reveal">
+      <p>Planning stops being a one-time task and becomes a continuous operational process.</p>
+    </div>
+
+    <p class="reveal">This is where graph-based operational state, executable policies, and constraint-aware planning start converging into a new runtime architecture for autonomous systems. Over time, this architecture will likely introduce a new generation of operational artifacts:</p>
+
+    <div class="pipeline-steps reveal">
+      <div class="pipeline-step">
+        <span class="step-num">→</span>
+        <div class="step-content">
+          <div class="step-title">Persistent Goals</div>
+          <div class="step-desc">Goal-oriented structures inspired by approaches like KAOS<a href="#ref-10" class="ref-sup">[10]</a> — goals that survive across long-running executions and adapt to environmental change.</div>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">→</span>
+        <div class="step-content">
+          <div class="step-title">Executable Organizational Roles</div>
+          <div class="step-desc">Role-oriented organizational modeling similar to Gaia<a href="#ref-11" class="ref-sup">[11]</a> — authority structures and responsibilities as first-class runtime artifacts.</div>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">→</span>
+        <div class="step-content">
+          <div class="step-title">Adaptive Coordination Structures</div>
+          <div class="step-desc">Organizational coordination patterns resembling MOISE+<a href="#ref-12" class="ref-sup">[12]</a> — dynamic reallocation of responsibilities under changing conditions.</div>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">→</span>
+        <div class="step-content">
+          <div class="step-title">Runtime Organizational Patterns</div>
+          <div class="step-desc">Long-horizon multi-agent system governance — institutional logic and adaptive multi-organizational research applied at runtime.<a href="#ref-14" class="ref-sup">[14]</a><a href="#ref-15" class="ref-sup">[15]</a></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONCLUSION -->
+<section class="conclusion" id="final">
+  <div class="conclusion-inner">
+    <h2 class="reveal">Toward Trustworthy Autonomy</h2>
+    <p class="conclusion-lead reveal">The next generation of enterprise AI systems will not be defined by how many actions they can generate.</p>
+
+    <blockquote class="conclusion-statement reveal">
+      They will be defined by how reliably they can sustain coordinated, goal-oriented behavior under continuously changing constraints.
+    </blockquote>
+
+    <p class="conclusion-lead reveal">This requires four structural shifts — none of which are prompting problems:</p>
+
+    <div class="conclusion-divider"></div>
+
+    <div class="bottleneck-grid reveal">
+      <div class="bottleneck-item">
+        <div class="bottleneck-num">01 — Runtime State</div>
+        <div class="bottleneck-title">Context as Operational State</div>
+        <div class="bottleneck-desc">Context must evolve continuously as a structured graph — not retrieved on demand as isolated text fragments. The graph becomes the operational substrate.</div>
+      </div>
+      <div class="bottleneck-item">
+        <div class="bottleneck-num">02 — Executable Rules</div>
+        <div class="bottleneck-title">Policies as Constraints</div>
+        <div class="bottleneck-desc">Policies must actively constrain execution — blocking actions, triggering escalations, requiring approvals. A policy that lives only in a document is not enforced.</div>
+      </div>
+      <div class="bottleneck-item">
+        <div class="bottleneck-num">03 — Validation Layer</div>
+        <div class="bottleneck-title">Generation ≠ Validity</div>
+        <div class="bottleneck-desc">Between reasoning and execution, there must be a constrained decision pipeline that filters, validates, and selects actions under runtime constraints — not just generates them.</div>
+      </div>
+      <div class="bottleneck-item">
+        <div class="bottleneck-num">04 — Continuous Planning</div>
+        <div class="bottleneck-title">Planning as a Process</div>
+        <div class="bottleneck-desc">Planning cannot be a one-time act before execution begins. It must continuously reevaluate, adapt, and maintain operational consistency as the world changes around the system.</div>
+      </div>
+    </div>
+
+    <div class="conclusion-divider"></div>
+
+    <p class="conclusion-final reveal">
+      The goal is not to eliminate probabilistic intelligence.<br><br>
+      <strong>The goal is to prevent probabilistic reasoning from directly controlling operational execution without deterministic validation layers around it.</strong>
+    </p>
+  </div>
+</section>
+
+<section class="references-section" id="references">
+  <div class="references-inner">
+    <div class="references-aside">
+      <span class="references-aside-label">Sources</span>
+      <span class="references-aside-title">References</span>
+    </div>
+    <div class="references-list">
+      <div class="ref-item" id="ref-1">
+        <span class="ref-num">[1]</span>
+        <span class="ref-text"><strong>Hogan, A., Blomqvist, E., Cochez, M., et al.</strong> <em>Knowledge Graphs.</em> ACM Computing Surveys, 2021.</span>
+      </div>
+      <div class="ref-item" id="ref-2">
+        <span class="ref-num">[2]</span>
+        <span class="ref-text"><strong>Edge, D., et al.</strong> <em>From Local to Global: A GraphRAG Approach to Query-Focused Summarization.</em> arXiv, 2024.</span>
+      </div>
+      <div class="ref-item" id="ref-3">
+        <span class="ref-num">[3]</span>
+        <span class="ref-text"><strong>Nii, H. P.</strong> <em>The Blackboard Model of Problem Solving and the Evolution of Blackboard Architectures.</em> AI Magazine, 1986.</span>
+      </div>
+      <div class="ref-item" id="ref-4">
+        <span class="ref-num">[4]</span>
+        <span class="ref-text"><strong>Wooldridge, M.</strong> <em>An Introduction to MultiAgent Systems.</em> Wiley, 2009.</span>
+      </div>
+      <div class="ref-item" id="ref-5">
+        <span class="ref-num">[5]</span>
+        <span class="ref-text"><strong>Ferber, J.</strong> <em>Multi-Agent Systems: An Introduction to Distributed Artificial Intelligence.</em> Addison-Wesley, 1999.</span>
+      </div>
+      <div class="ref-item" id="ref-6">
+        <span class="ref-num">[6]</span>
+        <span class="ref-text"><strong>Myers, K. L.</strong> <em>Towards a Framework for Continuous Planning and Execution.</em> AAAI, 1999.</span>
+      </div>
+      <div class="ref-item" id="ref-7">
+        <span class="ref-num">[7]</span>
+        <span class="ref-text"><strong>Rao, A. S., Georgeff, M. P.</strong> <em>BDI Agents: From Theory to Practice.</em> ICMAS, 1995.</span>
+      </div>
+      <div class="ref-item" id="ref-8">
+        <span class="ref-num">[8]</span>
+        <span class="ref-text"><strong>Ceri, S., Gottlob, G., Tanca, L.</strong> <em>Logic Programming and Databases.</em> Springer, 1990.</span>
+      </div>
+      <div class="ref-item" id="ref-9">
+        <span class="ref-num">[9]</span>
+        <span class="ref-text"><strong>Abiteboul, S., Hull, R., Vianu, V.</strong> <em>Foundations of Databases.</em> Addison-Wesley, 1995.</span>
+      </div>
+      <div class="ref-item" id="ref-10">
+        <span class="ref-num">[10]</span>
+        <span class="ref-text"><strong>van Lamsweerde, A.</strong> <em>Goal-Oriented Requirements Engineering: A Guided Tour.</em> 2001.</span>
+      </div>
+      <div class="ref-item" id="ref-11">
+        <span class="ref-num">[11]</span>
+        <span class="ref-text"><strong>Wooldridge, M., Jennings, N. R., &amp; Kinny, D.</strong> <em>The Gaia Methodology for Agent-Oriented Analysis and Design.</em> 2000.</span>
+      </div>
+      <div class="ref-item" id="ref-12">
+        <span class="ref-num">[12]</span>
+        <span class="ref-text"><strong>Hannoun, M., Sichman, J. S., Boissier, O., &amp; Sayettat, C.</strong> <em>MOISE: An Organizational Model for Multi-Agent Systems.</em> 2000.</span>
+      </div>
+      <div class="ref-item" id="ref-14">
+        <span class="ref-num">[14]</span>
+        <span class="ref-text"><strong>Dignum, V., &amp; Dignum, F.</strong> <em>The Role of Organizational Models in Agent Systems.</em> 2018.</span>
+      </div>
+      <div class="ref-item" id="ref-15">
+        <span class="ref-num">[15]</span>
+        <span class="ref-text"><strong>Tamersoy, M., Ekinci, E. E., Erdur, R. C., &amp; Dikenelli, O.</strong> <em>A Requirements Model for Adaptive Multi-Organizational Systems.</em> SASO, 2017.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>Agentic AI Research · Essay 02</p>
+  <p>Decision Infrastructure · Policy-Constrained Execution</p>
+</footer>
+
+<script>
+const progress = document.getElementById('progress');
+window.addEventListener('scroll', () => {
+  const scrollTop = window.scrollY;
+  const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+  progress.style.width = (scrollTop / docHeight * 100) + '%';
+});
+
+const reveals = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) setTimeout(() => entry.target.classList.add('visible'), 80);
+  });
+}, { threshold: 0.12 });
+reveals.forEach(el => observer.observe(el));
+
+const sections = ['hero','context','policies','pipeline','trustworthy','final'];
+const dots = document.querySelectorAll('.toc-dot');
+const tocObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const idx = sections.indexOf(entry.target.id);
+      dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+    }
+  });
+}, { threshold: 0.4 });
+sections.forEach(id => { const el = document.getElementById(id); if (el) tocObserver.observe(el); });
+dots.forEach((dot, i) => {
+  dot.addEventListener('click', () => {
+    const target = document.getElementById(sections[i]);
+    if (target) target.scrollIntoView({ behavior: 'smooth' });
+  });
+});
+</script>
+</body>
+</html>

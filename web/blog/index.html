@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agentic AI Research</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --ink: #0f0e0c; --ink-muted: #4a4845; --ink-faint: #9a9690;
+    --surface: #f5f3ee; --surface-2: #ede9e2; --surface-3: #e2ddd4;
+    --accent: #c8401a; --accent-2: #1a3c8c; --line: rgba(15,14,12,0.12);
+    --mono: 'DM Mono', monospace; --serif: 'DM Serif Display', serif; --sans: 'Syne', sans-serif;
+  }
+  html { scroll-behavior: smooth; }
+  body { background: var(--surface); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.75; -webkit-font-smoothing: antialiased; }
+
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.2rem 4vw; background: rgba(245,243,238,0.92); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav-logo { font-family: var(--mono); font-size: 0.75rem; font-weight: 500; color: var(--ink); letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none; }
+  .nav-tag { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint); }
+
+  /* INDEX HERO */
+  .index-hero {
+    min-height: 60vh; display: flex; flex-direction: column; justify-content: flex-end;
+    padding: 9rem 4vw 5rem; border-bottom: 1px solid var(--line);
+    position: relative; overflow: hidden;
+  }
+  .index-hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 59px, var(--line) 60px);
+    pointer-events: none;
+  }
+  .index-eyebrow { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 1.5rem; position: relative; }
+  .index-hero h1 { font-family: var(--serif); font-size: clamp(3rem, 7vw, 7rem); line-height: 1; color: var(--ink); max-width: 16ch; position: relative; margin-bottom: 1.5rem; }
+  .index-hero h1 em { font-style: italic; color: var(--accent); }
+  .index-hero p { font-size: 1.05rem; color: var(--ink-muted); max-width: 52ch; position: relative; }
+
+  /* ESSAY LIST */
+  .essay-list { padding: 0 4vw; }
+
+  .essay-card {
+    display: grid; grid-template-columns: 1fr 360px; gap: 0;
+    border-bottom: 1px solid var(--line);
+    text-decoration: none; color: inherit;
+    transition: background 0.2s;
+    position: relative;
+  }
+  .essay-card:hover { background: var(--surface-2); }
+  .essay-card:hover .card-arrow { transform: translateX(6px); }
+  .essay-card:hover .card-thumb img { transform: scale(1.04); filter: grayscale(0%) contrast(1.05); }
+
+  .card-body { padding: 4rem 5rem 4rem 0; display: flex; flex-direction: column; justify-content: space-between; }
+  .card-meta { display: flex; align-items: center; gap: 1.25rem; margin-bottom: 1.75rem; }
+  .card-num { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); }
+  .card-tag { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; background: var(--surface-3); padding: 0.25rem 0.7rem; border-radius: 100px; color: var(--ink-muted); }
+  .card-tag.blue { background: rgba(26,60,140,0.08); color: var(--accent-2); }
+  .card-title { font-family: var(--serif); font-size: clamp(1.8rem, 3vw, 2.6rem); line-height: 1.15; color: var(--ink); margin-bottom: 1rem; }
+  .card-excerpt { font-size: 0.95rem; color: var(--ink-muted); line-height: 1.7; max-width: 48ch; margin-bottom: 2rem; }
+  .card-footer { display: flex; align-items: center; gap: 1.5rem; }
+  .card-sections { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); }
+  .card-arrow { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); display: flex; align-items: center; gap: 0.4rem; transition: transform 0.25s; }
+
+  .card-thumb { overflow: hidden; border-left: 1px solid var(--line); }
+  .card-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; filter: grayscale(25%) contrast(1.02); transition: transform 0.6s ease, filter 0.4s ease; }
+
+  /* FOOTER */
+  footer { padding: 3rem 4vw; border-top: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; }
+  footer p { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); }
+
+  .reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 900px) {
+    .essay-card { grid-template-columns: 1fr; }
+    .card-thumb { height: 220px; border-left: none; border-top: 1px solid var(--line); }
+    .card-body { padding: 2.5rem 0; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">Agentic AI Research</a>
+  <span class="nav-tag">Essays on Planning Infrastructure</span>
+</nav>
+
+<!-- INDEX HERO -->
+<section class="index-hero">
+  <div class="index-eyebrow">Research Series · 2024–2025</div>
+  <h1>On the <em>Architecture</em> of Autonomous Systems</h1>
+  <p>A series of essays examining the structural gaps in modern agentic AI — and the planning infrastructure needed to close them.</p>
+</section>
+
+<!-- ESSAY LIST -->
+<div class="essay-list">
+
+  <!-- Essay 1 -->
+  <a class="essay-card reveal" href="missing_layer.html">
+    <div class="card-body">
+      <div>
+        <div class="card-meta">
+          <span class="card-num">Essay 01</span>
+          <span class="card-tag">Planning Infrastructure</span>
+        </div>
+        <h2 class="card-title">The Missing Layer in Modern AI Agents</h2>
+        <p class="card-excerpt">Long-horizon stability, constraint reasoning and organizational intelligence in the age of agentic AI. The main failure mode of modern agents is often not insufficient intelligence — it is the inability to maintain consistency over time.</p>
+      </div>
+      <div class="card-footer">
+        <span class="card-sections">7 Sections</span>
+        <span class="card-arrow">Read Essay →</span>
+      </div>
+    </div>
+    <div class="card-thumb">
+      <img src="https://images.unsplash.com/photo-1512856246663-647a81ef198e?w=720&auto=format&fit=crop&q=75" alt="Clock hands representing temporal consistency">
+    </div>
+  </a>
+
+  <!-- Essay 2 -->
+  <a class="essay-card reveal" href="regulation_aware.html">
+    <div class="card-body">
+      <div>
+        <div class="card-meta">
+          <span class="card-num">Essay 02</span>
+          <span class="card-tag blue">Decision Infrastructure</span>
+        </div>
+        <h2 class="card-title">Separating Probabilistic Intelligence from Deterministic Execution</h2>
+        <p class="card-excerpt">Most current agent architectures optimize action generation, not decision validity. In regulated enterprise environments, a structural limitation becomes increasingly visible — and consequential.</p>
+      </div>
+      <div class="card-footer">
+        <span class="card-sections">4 Sections</span>
+        <span class="card-arrow" style="color: var(--accent-2)">Read Essay →</span>
+      </div>
+    </div>
+    <div class="card-thumb">
+      <img src="https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=720&auto=format&fit=crop&q=75" alt="Power grid infrastructure representing reliable deterministic systems">
+    </div>
+  </a>
+
+</div>
+
+<footer>
+  <p>Agentic AI Research</p>
+  <p>Planning · Constraints · Organizational Intelligence</p>
+</footer>
+
+<script>
+const reveals = document.querySelectorAll('.reveal');
+const obs = new IntersectionObserver(entries => {
+  entries.forEach((e, i) => {
+    if (e.isIntersecting) setTimeout(() => e.target.classList.add('visible'), i * 120);
+  });
+}, { threshold: 0.1 });
+reveals.forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
